@@ -9,7 +9,9 @@ int main() {
     PageManager& manager = PageManager::Instance();
     manager.loadDatabase("test.invodb");
 
-    manager.getPage(0);
+    StoragePage page = manager.getPage(1);
+
+    for(int i=0; i<100; i++) printf("%c", page[i]);
 
     return 0;
 }

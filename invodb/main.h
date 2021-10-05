@@ -7,6 +7,5 @@
 
 #include <iostream>
 #include "io/page_manager.h"
-#include "io/virtual_storage.h"
 
 #endif //INVODB_MAIN_H

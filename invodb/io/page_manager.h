@@ -7,15 +7,15 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 class StoragePage {
 public:
+    void print();
+    StoragePage() { memset(page, 0, sizeof(page)); }
     char& operator[] (int index) { return this->page[index]; }
-    operator const char *() { return this->page; }
+    operator const char *() const { return this->page; }
     operator char *() { return this->page; }
-    ~StoragePage() {
-        printf("我被回收了");
-    }
 private:
     char page[4096];
 };
@@ -29,12 +29,13 @@ public:
     int loadDatabase(const char *filename);
     StoragePage& getPage(const int &index);
     void setPage(const int &index, const StoragePage &page);
+
 private:
     std::fstream stream;
 
     // 私有化实现单例
-    PageManager();
-    ~PageManager();
+    PageManager() {}
+    ~PageManager() {}
     PageManager(const PageManager&);
     PageManager& operator=(const PageManager&);
 };
