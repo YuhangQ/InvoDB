@@ -4,14 +4,13 @@
 
 #include "main.h"
 
-
 int main() {
-    PageManager& manager = PageManager::Instance();
-    manager.loadDatabase("test.invodb");
+    VirtualStorage::loadDatabase("test.invodb");
+    VirtualStorage& storage = VirtualStorage::Instance();
 
-    StoragePage page = manager.getPage(1);
 
-    for(int i=0; i<100; i++) printf("%c", page[i]);
+
+
 
     return 0;
 }

@@ -6,6 +6,7 @@
 #define INVODB_MAIN_H
 
 #include <iostream>
-#include "io/page_manager.h"
+#include "file/virtual_storage.h"
+#include "invodb/models/json.h"
 
 #endif //INVODB_MAIN_H

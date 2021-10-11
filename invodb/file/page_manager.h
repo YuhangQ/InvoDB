@@ -12,12 +12,15 @@
 class StoragePage {
 public:
     void print();
+    int next();
+    int setNext(const int& nextPage);
+    int* intArray();
     StoragePage() { memset(page, 0, sizeof(page)); }
     char& operator[] (int index) { return this->page[index]; }
     operator const char *() const { return this->page; }
     operator char *() { return this->page; }
 private:
-    char page[4096];
+    char page[1024];
 };
 
 class PageManager {
@@ -26,9 +29,10 @@ public:
         static PageManager instance;
         return instance;
     }
-    int loadDatabase(const char *filename);
-    StoragePage& getPage(const int &index);
+    static int loadDatabase(const char *filename);
+    StoragePage getPage(const int &index);
     void setPage(const int &index, const StoragePage &page);
+    int allocate();
 
 private:
     std::fstream stream;
