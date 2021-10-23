@@ -6,7 +6,6 @@
 #define INVODB_MAIN_H
 
 #include <iostream>
-#include "file/virtual_storage.h"
-#include "invodb/models/json.h"
+#include "models/collection.h"
 
 #endif //INVODB_MAIN_H

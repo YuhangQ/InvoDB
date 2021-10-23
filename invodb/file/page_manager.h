@@ -7,21 +7,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstring>
 
-class StoragePage {
-public:
-    void print();
-    int next();
-    int setNext(const int& nextPage);
-    int* intArray();
-    StoragePage() { memset(page, 0, sizeof(page)); }
-    char& operator[] (int index) { return this->page[index]; }
-    operator const char *() const { return this->page; }
-    operator char *() { return this->page; }
-private:
-    char page[1024];
-};
+#include "storage_page.h"
 
 class PageManager {
 public:
@@ -33,10 +20,9 @@ public:
     StoragePage getPage(const int &index);
     void setPage(const int &index, const StoragePage &page);
     int allocate();
-
+    void free(const int &index);
 private:
     std::fstream stream;
-
     // 私有化实现单例
     PageManager() {}
     ~PageManager() {}

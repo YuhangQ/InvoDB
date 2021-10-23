@@ -10,7 +10,7 @@ int PageManager::loadDatabase(const char *filename) {
 }
 
 StoragePage PageManager::getPage(const int &index) {
-    StoragePage page;
+    StoragePage page(index);
     // 调整指针位置
     stream.clear();
     stream.seekg(index * 1024);
@@ -24,29 +24,9 @@ void PageManager::setPage(const int &index, const StoragePage &page) {
     stream.write(page, 1024);
 }
 
-void StoragePage::print() {
-    for(int i=0; i<16; i++) {
-        for(int j=0; j<256; j++) {
-            printf("%u ", page[i * 16 + j]);
-        }
-        printf("\n");
-    }
+int PageManager::allocate() {
+    stream.seekp(0, std::ios::end);
+    int index = stream.tellp() / 1024;
+    setPage(index, StoragePage(index));
+    return index;
 }
-
-/**
- * 获取下一个连接的页，返回零则到达链结尾
- * @return
- */
-int StoragePage::next() {
-    return *((const int *)&page[1020]);
-}
-
-int StoragePage::setNext(const int &nextPage) {
-    *((int *)&page[1020]) = nextPage;
-    return 0;
-}
-
-int *StoragePage::intArray() {
-    return (int *)page;
-}
-

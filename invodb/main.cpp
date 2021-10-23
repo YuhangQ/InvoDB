@@ -5,12 +5,17 @@
 #include "main.h"
 
 int main() {
-    VirtualStorage::loadDatabase("test.invodb");
-    VirtualStorage& storage = VirtualStorage::Instance();
+    PageManager::loadDatabase("test.invodb");
+    Collection::loadCollections();
+
+    PageManager& manager = PageManager::Instance();
 
 
 
+    Collection &col = Collection::getCollection("hello");
 
+    JSON json("{\"hello\": 1}");
+    col.insert(json);
 
     return 0;
 }
