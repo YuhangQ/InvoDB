@@ -10,10 +10,8 @@
 
 class Logger {
 public:
-
     template<typename T>
     static void info(const T& msg);
-
     template<typename T, typename K>
     static void info(const T& first, const K& second);
     template<typename T>

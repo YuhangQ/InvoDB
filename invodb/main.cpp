@@ -5,11 +5,11 @@
 #include "main.h"
 
 int main() {
+
     PageManager::loadDatabase("test.invodb");
     Collection::loadCollections();
 
     PageManager& manager = PageManager::Instance();
-
 
     //Collection::createCollection("hello");
     Collection &col = Collection::getCollection("hello");

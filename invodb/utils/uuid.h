@@ -8,16 +8,12 @@
 #include <iostream>
 #include <string>
 
-std::string generateUUID() {
+void generateUUID(char *uuid) {
     srand(time(NULL));
-    std::string uuid;
     for(int i=0; i<32; i++) {
         int randn = rand() % 36;
-        //0~35;
-        uuid += (randn < 26 ? ('a' + randn) : ('0' + (randn - 26)));
+        uuid[i] = (randn < 26 ? ('a' + randn) : ('0' + (randn - 26)));
     }
-    std::cout << uuid << std::endl;
-    return uuid;
 }
 
 #endif //INVODB_UUID_H

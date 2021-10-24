@@ -47,7 +47,6 @@ void StoragePage::setStringStartFrom(const int &index, const char *str) {
     for(int i=0; i<strlen(str); i++) {
         page[index+i] = str[i];
     }
-
 }
 
 void StoragePage::save() {
