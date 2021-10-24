@@ -7,16 +7,17 @@
 
 #include <iostream>
 #include <string>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/uuid_generators.hpp>
 
 std::string generateUUID() {
-    boost::uuids::uuid a_uuid = boost::uuids::random_generator()();
-    std::string uuid_string = boost::uuids::to_string(a_uuid);
-    std::remove(uuid_string.begin(), uuid_string.end(), '-');
-    uuid_string.resize(32);
-    return uuid_string;
+    srand(time(NULL));
+    std::string uuid;
+    for(int i=0; i<32; i++) {
+        int randn = rand() % 36;
+        //0~35;
+        uuid += (randn < 26 ? ('a' + randn) : ('0' + (randn - 26)));
+    }
+    std::cout << uuid << std::endl;
+    return uuid;
 }
 
 #endif //INVODB_UUID_H

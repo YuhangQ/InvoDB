@@ -11,7 +11,7 @@ int main() {
     PageManager& manager = PageManager::Instance();
 
 
-
+    //Collection::createCollection("hello");
     Collection &col = Collection::getCollection("hello");
 
     JSON json("{\"hello\": 1}");

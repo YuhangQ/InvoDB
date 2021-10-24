@@ -15,7 +15,7 @@ void Collection::insert(JSON &json) {
         std::string uuid = generateUUID();
         Document::AllocatorType &allocator = json.GetAllocator();
         Value invoid (kStringType);
-        invoid.SetString(uuid.c_str(), uuid.size());
+        invoid.SetString(uuid.c_str(), 3);
         json.AddMember(" __Invo_ID__", invoid, allocator);
     }
 
@@ -57,6 +57,7 @@ Collection& Collection::createCollection(const std::string &name) {
     int id = *free.begin();
     free.erase(free.begin());
 
+    printf("id: %d\n", id / 32);
     StoragePage page = PageManager::Instance().getPage(id / 32);
     id %= 32;
 
@@ -68,7 +69,10 @@ Collection& Collection::createCollection(const std::string &name) {
 
     page.setStringStartFrom(id*32, name.c_str());
     page.setIntStartFrom(id*32+28, collectionPage);
+    page.print();
     page.save();
+
+
 
     Collection *col = new Collection(name, collectionPage);
 

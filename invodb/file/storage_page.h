@@ -23,10 +23,11 @@ public:
     void setIntStartFrom(const int &index, const int &value);
     void setStringStartFrom(const int &index, const char *str);
     int *intArray();
-    StoragePage(const int& id) { memset(page, 0, sizeof(page)); }
+    StoragePage(const int& id) { memset(page, 0, sizeof(page)); this->address = id; }
     char& operator[] (int index) { return this->page[index]; }
     operator const char *() const { return this->page; }
     operator char *() { return this->page; }
+    int getAddress();
 private:
     char page[1024];
     int address;

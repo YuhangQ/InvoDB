@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.16.3)
 project(InvoDB)
 
 set(CMAKE_CXX_STANDARD 14)
 
-
-
-include_directories(/opt/homebrew/Cellar/boost/1.76.0/include)
 include_directories(.)
 include_directories(./invodb)
 

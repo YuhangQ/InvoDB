@@ -54,3 +54,7 @@ void StoragePage::save() {
     PageManager::Instance().setPage(address, *this);
 }
 
+int StoragePage::getAddress() {
+    return address;
+}
+
