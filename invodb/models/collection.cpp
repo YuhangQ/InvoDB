@@ -19,6 +19,8 @@ void Collection::insert(JSON &json) {
         json.AddMember(" __Invo_ID__", invoid, allocator);
     }
 
+
+
     Logger::info<std::string>(json.ToString());
 }
 
