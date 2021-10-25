@@ -7,11 +7,13 @@
 
 #include "file/page_manager.h"
 #include "utils/logger.h"
+#include "btree/btree_uuid.h"
 #include "json.h"
 #include <map>
 #include <set>
 #include <algorithm>
 #include <cstring>
+#include "utils/uuid.h"
 
 class Collection {
 public:

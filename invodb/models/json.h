@@ -16,7 +16,6 @@ class JSON : public Document {
 public:
     JSON(std::string json): Document() { this->Parse(json.c_str()); }
     JSON(const char *json): Document() { this->Parse(json); }
-
     std::string ToString();
 private:
 };

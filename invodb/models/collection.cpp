@@ -3,7 +3,6 @@
 //
 
 #include "collection.h"
-#include "utils/uuid.h"
 
 Collection::Collection(const std::string &name, const int &firstPage) {
     Logger::info<std::string, std::string>("load Collection: ", name);

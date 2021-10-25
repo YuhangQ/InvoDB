@@ -8,8 +8,7 @@
 #include <iostream>
 #include <string>
 
-void generateUUID(char *uuid) {
-    srand(time(NULL));
+inline void generateUUID(char *uuid) {
     for(int i=0; i<32; i++) {
         int randn = rand() % 36;
         uuid[i] = (randn < 26 ? ('a' + randn) : ('0' + (randn - 26)));
