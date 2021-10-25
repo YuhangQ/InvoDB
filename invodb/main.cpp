@@ -27,7 +27,7 @@ int main() {
 
     BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
     char uuid[32];
-    for(int i=0; i<1000; i++) {
+    for(int i=0; i<100000; i++) {
         generateUUID(uuid);
         btree->insert(uuid, PageManager::Instance().allocate());
     }

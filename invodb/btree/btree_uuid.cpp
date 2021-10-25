@@ -25,7 +25,7 @@ void BTreeUUID::insert(const char *uuid, int address) {
                 break;
             }
         }
-        cur->parent = cur->getAddress();
+        cur->parent = parent->getAddress();
     }
 
     // insert directly
@@ -77,10 +77,16 @@ void BTreeUUID::insertInternal(std::string uuid, BTreeNodeUUID *cur, BTreeNodeUU
         rLeaf->save();
         return;
     }
+
     BTreeNodeUUID* newLChild = BTreeNodeUUID::getNode(PageManager::Instance().allocate());
     BTreeNodeUUID* newRChild = BTreeNodeUUID::getNode(PageManager::Instance().allocate());
     newLChild->setLeaf(false);
     newRChild->setLeaf(false);
+
+    if(cur->size() != 27) {
+        printf("%d %d %d p:%d cur:%d\n", cur->size(), cur->isLeaf(), cur==root, cur->parent, cur->getAddress());
+        exit(0);
+    }
 
     int pos = cur->insert(uuid);
     cur->val[pos] = lLeaf->getAddress();
@@ -106,8 +112,6 @@ void BTreeUUID::insertInternal(std::string uuid, BTreeNodeUUID *cur, BTreeNodeUU
         newRoot->save();
         newLChild->save();
         newRChild->save();
-
-
     } else {
         insertInternal(cur->key[mid], BTreeNodeUUID::getNode(cur->parent), newLChild, newRChild);
     }

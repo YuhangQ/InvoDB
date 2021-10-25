@@ -47,19 +47,27 @@ public:
     void updateParent() {
         if(isLeaf()) return;
         for(int i=0; i<=size(); i++) {
-
+            BTreeNodeUUID child = getNode(val[i])->parent;
+            child.parent = address;
+            child.save();
         }
     }
     int size() {
         return n_size;
     }
     int insert(const std::string uuid) {
+
+//        static int cnt = 0;
+//        if(!isLeaf() && size() >= 27) {
+//            if(cnt) throw "fuck";
+//            cnt++;
+//        }
         int pos = 0;
         while(pos < n_size && uuid > key[pos]) pos++;
         val[n_size + 1] = val[n_size];
         for(int i=n_size; i>pos; i--) {
-            key[i] = key[i - 1];
             val[i] = val[i - 1];
+            key[i] = key[i - 1];
         }
         key[pos] = uuid;
         n_size++;
@@ -95,8 +103,8 @@ public:
         page.save();
     }
     static const int m = 28;
-    std::string key[m];
-    int val[m+1];
+    std::string key[m+100];
+    int val[m+200];
     int parent;
 private:
     static std::map<int, BTreeNodeUUID*> map;
