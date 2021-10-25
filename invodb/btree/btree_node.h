@@ -103,8 +103,8 @@ public:
         page.save();
     }
     static const int m = 28;
-    std::string key[m+100];
-    int val[m+200];
+    std::string key[m];
+    int val[m+1];
     int parent;
 private:
     static std::map<int, BTreeNodeUUID*> map;

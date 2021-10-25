@@ -13,8 +13,8 @@ public:
     ~BTreeUUID() { delete root; };
     void insert(const char* uuid, int address);
     void print();
-    void innerPrint(BTreeNodeUUID* cur);
 private:
+    void innerPrint(BTreeNodeUUID* cur);
     void split(std::string uuid, int address, BTreeNodeUUID* parent, BTreeNodeUUID* cur);
     void insertInternal(std::string uuid, BTreeNodeUUID* cur, BTreeNodeUUID* lLeaf, BTreeNodeUUID* rLeaf);
     BTreeNodeUUID *root;
