@@ -11,9 +11,11 @@ class BTreeUUID {
 public:
     BTreeUUID(const int& address);
     void insert(const char* uuid, int address);
+    int find(std::string uuid);
     void print();
 private:
     void innerPrint(BTreeNodeUUID* cur);
+
     void split(std::string uuid, int address, int parentAddr, int curAddr);
     void insertInternal(std::string uuid, int curAddr, int lLeafAddr, int rLeafAddr);
     int root;

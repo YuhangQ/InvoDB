@@ -177,6 +177,26 @@ void BTreeUUID::innerPrint(BTreeNodeUUID *cur) {
 
 
 }
+
+int BTreeUUID::find(std::string uuid) {
+    BTreeNodeUUID* cur = BTreeNodeUUID::getNode(root);
+    while(!cur->leaf) {
+        for(int i=0; i<cur->size; i++) {
+            if(uuid < cur->key[i]) {
+                cur = BTreeNodeUUID::getNode(cur->val[i]);
+                break;
+            }
+            if(i == cur->size - 1) {
+                cur = BTreeNodeUUID::getNode(cur->val[i + 1]);
+                break;
+            }
+        }
+    }
+    for(int i=0; i<cur->size; i++) {
+        if(uuid == cur->key[i]) return cur->val[i];
+    }
+    return -1;
+}
 /*
 void BTreeUUID::innerInsert(BTreeNodeUUID* &p, BTreeNodeUUID* f, const char *uuid, int address) {
     if(p == nullptr) {

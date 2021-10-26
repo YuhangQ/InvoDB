@@ -27,12 +27,18 @@ int main() {
 
     BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
     char uuid[32];
-    for(int i=0; i<1000000; i++) {
+
+    std::vector<std::string> v;
+
+    for(int i=0; i<10000; i++) {
         generateUUID(uuid);
+        v.push_back(std::string(uuid, 32));
         btree->insert(uuid, PageManager::Instance().allocate());
     }
 
     btree->print();
+
+    printf("%d\n", btree->find("123"));
 
     return 0;
 }
