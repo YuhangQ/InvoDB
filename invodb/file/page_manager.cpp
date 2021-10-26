@@ -22,6 +22,7 @@ void PageManager::setPage(const int &index, const StoragePage &page) {
     stream.clear();
     stream.seekg(index * 1024);
     stream.write(page, 1024);
+    stream.flush();
 }
 
 int PageManager::allocate() {

@@ -14,6 +14,7 @@ int main() {
 
     PageManager& manager = PageManager::Instance();
 
+
     Collection *col;
     try {
        col = &Collection::getCollection("hello");
@@ -24,10 +25,9 @@ int main() {
     JSON json("{\"hello\": 1}");
     col->insert(json);
 
-
     BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
     char uuid[32];
-    for(int i=0; i<100000; i++) {
+    for(int i=0; i<1000000; i++) {
         generateUUID(uuid);
         btree->insert(uuid, PageManager::Instance().allocate());
     }

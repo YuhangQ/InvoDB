@@ -9,7 +9,6 @@ Collection::Collection(const std::string &name, const int &firstPage) {
 }
 
 void Collection::insert(JSON &json) {
-
     if(!json.HasMember("__Invo_ID__")) {
         char uuid[32];
         generateUUID(uuid);

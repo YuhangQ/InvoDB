@@ -24,7 +24,7 @@ public:
     void setStringStartFrom(const int &index, const char *str);
     int *intArray();
     StoragePage(const int& id) { memset(page, 0, sizeof(page)); this->address = id; }
-    char& operator[] (int index) { return this->page[index]; }
+    char& operator[] (int index) { if(index>=1024 || index < 0) throw "overflow"; else return this->page[index]; }
     operator const char *() const { return this->page; }
     operator char *() { return this->page; }
     int getAddress();

@@ -10,14 +10,13 @@
 class BTreeUUID {
 public:
     BTreeUUID(const int& address);
-    ~BTreeUUID() { delete root; };
     void insert(const char* uuid, int address);
     void print();
 private:
     void innerPrint(BTreeNodeUUID* cur);
-    void split(std::string uuid, int address, BTreeNodeUUID* parent, BTreeNodeUUID* cur);
-    void insertInternal(std::string uuid, BTreeNodeUUID* cur, BTreeNodeUUID* lLeaf, BTreeNodeUUID* rLeaf);
-    BTreeNodeUUID *root;
+    void split(std::string uuid, int address, int parentAddr, int curAddr);
+    void insertInternal(std::string uuid, int curAddr, int lLeafAddr, int rLeafAddr);
+    int root;
     int cnt;
 };
 
