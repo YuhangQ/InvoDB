@@ -29,7 +29,7 @@ public:
     void clear();
     void save();
     //static const int m = 27;
-    static const int m = 3;
+    static const int m = 27;
     static const int maxCount = m - 1;
     static const int minLeafCount = m / 2;
     static const int minLinkCount = (m - 1) / 2;

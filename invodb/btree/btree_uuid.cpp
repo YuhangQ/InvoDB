@@ -243,7 +243,7 @@ void BTreeUUID::remove(const std::string &uuid) {
 }
 
 void BTreeUUID::removeEntry(int curAddr, const std::string& uuid, const int& pointer) {
-    printf("---removeEntry: %d %s %d\n", curAddr, uuid.c_str(), pointer);
+    //printf("---removeEntry: %d %s %d\n", curAddr, uuid.c_str(), pointer);
 
     NodeUUID* cur = NodeUUID::getNode(curAddr);
     int pos = cur->findPos(uuid);
@@ -270,7 +270,7 @@ void BTreeUUID::removeEntry(int curAddr, const std::string& uuid, const int& poi
     if(cur->enough() || cur->address == root) return;
 
 
-    printf("em %d %d\n", cur->address, cur->size);
+    //printf("em %d %d\n", cur->address, cur->size);
 
 
     if(canCoalesce(cur->address, cur->left)) {
@@ -297,7 +297,7 @@ bool BTreeUUID::canCoalesce(int curAddr, int sibAddr) {
 
 void BTreeUUID::coalesce(int curAddr, int sibAddr) {
 
-    printf("coalesce %d and %d\n", curAddr, sibAddr);
+    //printf("coalesce %d and %d\n", curAddr, sibAddr);
 
     NodeUUID* cur = NodeUUID::getNode(curAddr);
     NodeUUID* sib = NodeUUID::getNode(sibAddr);
@@ -364,7 +364,7 @@ bool BTreeUUID::canRedistribute(int curAddr, int sibAddr) {
 
 void BTreeUUID::redistribute(int curAddr, int sibAddr) {
 
-    printf("redistribute %d from %d\n", curAddr, sibAddr);
+    //printf("redistribute %d from %d\n", curAddr, sibAddr);
 
     NodeUUID* cur = NodeUUID::getNode(curAddr);
     NodeUUID* sib = NodeUUID::getNode(sibAddr);

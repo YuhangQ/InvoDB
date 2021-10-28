@@ -3,6 +3,7 @@ project(InvoDB)
 
 set(CMAKE_CXX_STANDARD 14)
 
+
 include_directories(.)
 include_directories(./invodb)
 

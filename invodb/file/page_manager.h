@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <map>
 
 #include "storage_page.h"
 
@@ -22,6 +23,7 @@ public:
     int allocate();
     void free(const int &index);
 private:
+    std::map<int, StoragePage> map;
     std::fstream stream;
     // 私有化实现单例
     PageManager() {}

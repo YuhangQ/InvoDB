@@ -13,6 +13,7 @@ class PageManager;
 
 class StoragePage {
 public:
+    StoragePage();
     void print();
     int next();
     void setNext(const int& nextPage);

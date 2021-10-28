@@ -11,6 +11,9 @@ NodeUUID *NodeUUID::getNode(const int &address) {
         delete map[address];
         map[address] = new NodeUUID(address);
     }
+//    if(map.count(address) == 0) {
+//        map[address] = new NodeUUID(address);
+//    }
     return map[address];
 }
 

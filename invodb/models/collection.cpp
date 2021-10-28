@@ -70,8 +70,6 @@ Collection& Collection::createCollection(const std::string &name) {
     page.print();
     page.save();
 
-
-
     Collection *col = new Collection(name, collectionPage);
 
     map.insert(make_pair(name, col));

@@ -11,7 +11,7 @@ void benchmark() {
 
     std::vector<std::pair<std::string, int>> v;
 
-    const int n = 1000000;
+    const int n = 100000;
 
     for(int i=0; i<n; i++) {
         generateUUID(uuid);
@@ -20,15 +20,27 @@ void benchmark() {
         btree->insert(uuid, addr);
     }
 
-    for(int i=0; i<1000000; i++) {
+    for(int i=0; i<100000; i++) {
         std::swap(v[rand()%v.size()], v[rand()%v.size()]);
     }
 
     for(int i=0; i<v.size(); i++) {
-        int addr = btree->find(v[0].first);
-        if(addr != v[0].second) {
+        int addr = btree->find(v[i].first);
+        if(addr != v[i].second) {
             printf("fuck\n");
             exit(0);
+        }
+    }
+
+    for(int i=0; i<v.size(); i++) {
+        if(i < v.size() / 2) {
+            btree->remove(v[i].first);
+        } else {
+            int addr = btree->find(v[i].first);
+            if(addr != v[i].second) {
+                printf("fuck\n");
+                exit(0);
+            }
         }
     }
 }

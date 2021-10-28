@@ -57,3 +57,7 @@ int StoragePage::getAddress() {
     return address;
 }
 
+StoragePage::StoragePage() {
+
+}
+
