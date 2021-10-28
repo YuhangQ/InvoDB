@@ -4,8 +4,40 @@
 
 #include "main.h"
 
+
+void benchmark() {
+    BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
+    char uuid[33]; uuid[32] = '\0';
+
+    std::vector<std::pair<std::string, int>> v;
+
+    const int n = 1000000;
+
+    for(int i=0; i<n; i++) {
+        generateUUID(uuid);
+        int addr = PageManager::Instance().allocate();
+        v.push_back(std::make_pair(uuid, addr));
+        btree->insert(uuid, addr);
+    }
+
+    for(int i=0; i<1000000; i++) {
+        std::swap(v[rand()%v.size()], v[rand()%v.size()]);
+    }
+
+    for(int i=0; i<v.size(); i++) {
+        int addr = btree->find(v[0].first);
+        if(addr != v[0].second) {
+            printf("fuck\n");
+            exit(0);
+        }
+    }
+}
+
 int main() {
-    srand(time(NULL));
+    int t = time(0);
+    //srand(1635418590);
+    srand(1635423140);
+    printf("seed: %d\n", t);
 
     system("rm -rf test.invodb && touch test.invodb");
 
@@ -25,20 +57,7 @@ int main() {
     JSON json("{\"hello\": 1}");
     col->insert(json);
 
-    BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
-    char uuid[32];
-
-    std::vector<std::string> v;
-
-    for(int i=0; i<10000; i++) {
-        generateUUID(uuid);
-        v.push_back(std::string(uuid, 32));
-        btree->insert(uuid, PageManager::Instance().allocate());
-    }
-
-    btree->print();
-
-    printf("%d\n", btree->find("123"));
+    benchmark();
 
     return 0;
 }

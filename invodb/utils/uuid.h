@@ -15,4 +15,25 @@ inline void generateUUID(char *uuid) {
     }
 }
 
+inline std::string appropriateString(const std::string& s, const int& offset) {
+    int a[s.size()];
+    for(int i=0; i<s.size(); i++) a[i] = s[s.size()-i-1];
+    a[0] += offset;
+    for(int i=0; i<s.size(); i++) {
+        if(a[i] <= 0) {
+            a[i] += 256;
+            a[i+1]--;
+        }
+    }
+    for(int i=0; i<s.size(); i++) {
+        printf("%c ", a[i]);
+    }
+    printf("\n");
+    std::string res;
+    for(int i=s.size()-1; i>=0; i--) {
+        res += a[i];
+    }
+    return res;
+}
+
 #endif //INVODB_UUID_H

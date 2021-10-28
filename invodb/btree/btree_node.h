@@ -18,14 +18,28 @@
  */
 
 
-class BTreeNodeUUID {
+class NodeUUID {
 public:
-    static BTreeNodeUUID* getNode(const int& address);
-    int insert(const std::string uuid);
+    static NodeUUID* getNode(const int& address);
+    static NodeUUID* release(const int& address);
+    int insert(const std::string& uuid);
+    int findPos(const std::string& uuid);
     void print();
+    void release();
     void clear();
     void save();
-    static const int m = 27;
+    //static const int m = 27;
+    static const int m = 3;
+    static const int maxCount = m - 1;
+    static const int minLeafCount = m / 2;
+    static const int minLinkCount = (m - 1) / 2;
+    bool enough() {
+        if(leaf) return size >= minLeafCount;
+        else return size >= minLinkCount;
+    }
+    bool full() {
+        return size == maxCount;
+    }
     std::string key[m+1];
     int val[m+1];
     int parent;
@@ -35,8 +49,8 @@ public:
     int size;
     int address;
 private:
-    BTreeNodeUUID(const int& address);
-    static std::map<int, BTreeNodeUUID*> map;
+    NodeUUID(const int& address);
+    static std::map<int, NodeUUID*> map;
 
 };
 
