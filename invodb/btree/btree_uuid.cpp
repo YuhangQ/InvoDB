@@ -6,6 +6,7 @@
 
 BTreeUUID::BTreeUUID(const int& address) {
     root = address;
+    n_size = 0;
 }
 
 int BTreeUUID::find(const std::string& uuid) {

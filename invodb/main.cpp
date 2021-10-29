@@ -29,7 +29,7 @@ int main() {
     col->insert(json);
 
     BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
-    btree->testAndBenchmark(1000);
+    btree->testAndBenchmark(100000);
 
     return 0;
 }
