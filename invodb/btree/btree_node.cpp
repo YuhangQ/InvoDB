@@ -7,6 +7,9 @@
 std::map<int, NodeUUID*> NodeUUID::map;
 
 NodeUUID *NodeUUID::getNode(const int &address) {
+    if(address == 0) {
+        throw "fuck";
+    }
     if(map.count(address) == 0) {
         delete map[address];
         map[address] = new NodeUUID(address);
@@ -98,3 +101,6 @@ void NodeUUID::release() {
 NodeUUID *NodeUUID::release(const int &address) {
     return nullptr;
 }
+
+
+

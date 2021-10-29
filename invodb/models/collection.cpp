@@ -10,11 +10,9 @@ Collection::Collection(const std::string &name, const int &firstPage) {
 
 void Collection::insert(JSON &json) {
     if(!json.HasMember("__Invo_ID__")) {
-        char uuid[32];
-        generateUUID(uuid);
         Document::AllocatorType &allocator = json.GetAllocator();
         Value invoid (kStringType);
-        invoid.SetString(uuid, 32);
+        invoid.SetString(generateUUID().c_str(), 32);
         json.AddMember("__Invo_ID__", invoid, allocator);
     }
     Logger::info<std::string, std::string>("INSERT ", json.ToString());

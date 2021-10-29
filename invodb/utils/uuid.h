@@ -8,11 +8,13 @@
 #include <iostream>
 #include <string>
 
-inline void generateUUID(char *uuid) {
+inline std::string generateUUID() {
+    char uuid[33]; uuid[32] = '\0';
     for(int i=0; i<32; i++) {
         int randn = rand() % 36;
         uuid[i] = (randn < 26 ? ('a' + randn) : ('0' + (randn - 26)));
     }
+    return std::string(uuid, 32);
 }
 
 inline std::string appropriateString(const std::string& s, const int& offset) {

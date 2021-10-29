@@ -19,7 +19,6 @@ int BTreeUUID::find(const std::string& uuid) {
 int BTreeUUID::findNode(const std::string& uuid) {
     NodeUUID* cur = NodeUUID::getNode(root);
     while(!cur->leaf) {
-        int parent = cur->address;
         for(int i=0; i<cur->size; i++) {
             if(uuid < cur->key[i]) {
                 cur = NodeUUID::getNode(cur->val[i]);
@@ -30,31 +29,27 @@ int BTreeUUID::findNode(const std::string& uuid) {
                 break;
             }
         }
-        //if(cur->parent != parent) cur->parent = parent;
-        //cur->save();
     }
     return cur->address;
 }
 
+void BTreeUUID::update(const std::string &uuid, int address) {
+    if(find(uuid) == -1) {
+        throw "key doesn't exists.";
+    }
+    NodeUUID* cur = NodeUUID::getNode(findNode(uuid));
+    cur->val[cur->findPos(uuid)] = address;
+    cur->save();
+}
 
 void BTreeUUID::insert(const std::string& uuid, int address) {
-
-    NodeUUID* cur = NodeUUID::getNode(root);
-    NodeUUID* parent = nullptr;
-
-    while(!cur->leaf) {
-        parent = cur;
-        for(int i=0; i<cur->size; i++) {
-            if(uuid < cur->key[i]) {
-                cur = NodeUUID::getNode(cur->val[i]);
-                break;
-            }
-            if(i == cur->size - 1) {
-                cur = NodeUUID::getNode(cur->val[i + 1]);
-                break;
-            }
-        }
+    if(find(uuid) != -1) {
+        throw "key already exists.";
     }
+
+    n_size++;
+
+    NodeUUID* cur = NodeUUID::getNode(findNode(uuid));
 
     // insert directly
     if(cur->size < cur->m - 1) {
@@ -64,13 +59,11 @@ void BTreeUUID::insert(const std::string& uuid, int address) {
     }
 
     // split
-    if(parent == nullptr) split(uuid, address, 0, cur->address);
-    else split(uuid, address, parent->address, cur->address);
+    split(uuid, address, cur->parent, cur->address);
 }
 
 void BTreeUUID::split(const std::string& uuid, int address, int parentAddr, int curAddr) {
 
-    NodeUUID* parent = NodeUUID::getNode(parentAddr);
     NodeUUID* cur = NodeUUID::getNode(curAddr);
 
     cur->val[cur->insert(uuid)] = address;
@@ -116,7 +109,7 @@ void BTreeUUID::split(const std::string& uuid, int address, int parentAddr, int 
     } else {
         lLeaf->save();
         rLeaf->save();
-        insertInternal(rLeaf->key[0], parent->address, lLeaf->address, rLeaf->address);
+        insertInternal(rLeaf->key[0], cur->parent, lLeaf->address, rLeaf->address);
     }
 }
 
@@ -203,7 +196,7 @@ void BTreeUUID::insertInternal(const std::string& uuid, int curAddr, int lLeafAd
     }
 }
 
-
+/*
 void BTreeUUID::print() {
     innerPrint(NodeUUID::getNode(root));
 }
@@ -235,10 +228,14 @@ void BTreeUUID::innerPrint(NodeUUID *cur) {
     }
 
 }
+ */
 
 void BTreeUUID::remove(const std::string &uuid) {
+    if(find(uuid) == -1) {
+        throw "key doesn't exists.";
+    }
+    n_size--;
     NodeUUID* cur = NodeUUID::getNode(findNode(uuid));
-    if(find(uuid) == -1) printf("ohFUCK\n");
     removeEntry(cur->address, uuid, find(uuid));
 }
 
@@ -428,14 +425,62 @@ void BTreeUUID::redistribute(int curAddr, int sibAddr) {
     parent->save();
 }
 
-int BTreeUUID::test() {
-    NodeUUID* cur = NodeUUID::getNode(findNode("\0"));
-    int sum = cur->size;
-    while(cur->right) {
-        cur = NodeUUID::getNode(cur->right);
-        sum += cur->size;
+int BTreeUUID::size() {
+    return n_size;
+}
+
+void BTreeUUID::testAndBenchmark(const int& n) {
+
+    clock_t start = clock();
+
+    std::map<std::string, int> map;
+
+    for(int i=0; i<n; i++) {
+        int opt = rand() % 4;
+        // insert
+        if(opt <= 1) {
+            std::string uuid = generateUUID();
+            int addr = rand();
+            insert(uuid, addr);
+            map[uuid] = addr;
+        }
+        // update
+        else if(opt == 2) {
+            if(map.size() == 0) continue;
+            auto it = map.begin();
+            std::advance(it, rand() % map.size());
+            std::string uuid = it->first;
+            int addr = rand();
+            map[uuid] = addr;
+            update(uuid, addr);
+        }
+        // remove
+        else {
+            if(map.size() == 0) continue;
+            auto it = map.begin();
+            std::advance(it, rand() % map.size());
+            std::string uuid = it->first;
+            map.erase(uuid);
+            remove(uuid);
+        }
     }
-    return sum;
+
+    if(map.size() != size()) {
+        printf("%d %d\n", map.size(), size());
+        printf("BTree has BUG!\n");
+        exit(0);
+    }
+
+    for(auto it=map.begin(); it != map.end(); it++) {
+        if(find(it->first) != it->second) {
+            printf("BTree has BUG!\n");
+            exit(0);
+        }
+    }
+
+    clock_t end   = clock();
+
+    printf("BTree pass the test with n=%d, time=%fs!\n", n, (double)(end - start) / CLOCKS_PER_SEC);
 }
 
 

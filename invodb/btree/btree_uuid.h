@@ -12,10 +12,12 @@ class BTreeUUID {
 public:
     BTreeUUID(const int& address);
     void insert(const std::string& uuid, int address);
+    void update(const std::string& uuid, int address);
     void remove(const std::string& uuid);
     int find(const std::string& uuid);
     void print();
-    int test();
+    void testAndBenchmark(const int& n);
+    int size();
 private:
     void removeEntry(int curAddr, const std::string& uuid, const int& pointer);
     bool canCoalesce(int curAddr, int sibAddr);
@@ -27,7 +29,7 @@ private:
     void split(const std::string& uuid, int address, int parentAddr, int curAddr);
     void insertInternal(const std::string& uuid, int curAddr, int lLeafAddr, int rLeafAddr);
     int root;
-    int cnt;
+    int n_size;
 };
 
 
