@@ -13,7 +13,7 @@ int main() {
     srand(t);
     printf("seed: %d\n", t);
 
-    system("rm -rf test.invodb && touch test.invodb");
+    //system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
     Collection::loadCollections();
@@ -40,21 +40,20 @@ int main() {
 
 void testAndBenchmark(int n) {
 
+    auto btree = new BTree<27, std::string, 32>(PageManager::Instance().allocate());
 
-    auto btree = new BTree<15, std::string, 32, double, 8>(PageManager::Instance().allocate());
     printf("nodeSize: %d\n", btree->getNodeSize());
-
 
     clock_t start = clock();
 
-    std::map<std::string, double> map;
+    std::map<std::string, int> map;
 
     for(int i=0; i<n; i++) {
         int opt = rand() % 4;
         // insert
         if(opt <= 1) {
             std::string uuid = generateUUID();
-            double addr = (double)rand() / 100;
+            int addr = rand();
             btree->insert(uuid, addr);
             map[uuid] = addr;
         }
@@ -64,7 +63,7 @@ void testAndBenchmark(int n) {
             auto it = map.begin();
             std::advance(it, rand() % map.size());
             std::string uuid = it->first;
-            double addr = (double)rand() / 100;
+            double addr = rand();
             map[uuid] = addr;
             btree->update(uuid, addr);
         }
@@ -88,10 +87,9 @@ void testAndBenchmark(int n) {
     printf("test res k-v: %d\n", map.size());
 
     for(auto it=map.begin(); it != map.end(); it++) {
-        printf("%llf %llf\n", btree->find(it->first), it->second);
         if(btree->find(it->first) != it->second) {
             printf("BTree has BUG!\n");
-            //exit(0);
+            exit(0);
         }
     }
 

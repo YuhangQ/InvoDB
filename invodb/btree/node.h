@@ -12,11 +12,11 @@
 #include <type_traits>
 #include "file/page_manager.h"
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
+template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
 public:
-    static BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>* getNode(const int &address);
-    static BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>* release(const int &address);
+    static BTreeNode<M_SIZE, KT, K_SIZE>* getNode(const int &address);
+    static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &address);
     int insert(KT const &key);
     int findPos(KT const &key);
     void release();
@@ -34,7 +34,7 @@ public:
         return size == maxCount;
     }
     KT keySet[m + 1];
-    VT linkSet[m + 1];
+    int linkSet[m + 1];
     int parent;
     int left;
     int right;
@@ -45,8 +45,8 @@ private:
     BTreeNode(const int& address);
 };
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::BTreeNode(const int& address): address(address) {
+template<int M_SIZE, typename KT, int K_SIZE>
+BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
     clear();
     StoragePage page = PageManager::Instance().getPage(address);
     int p = 0;
@@ -74,46 +74,33 @@ BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::BTreeNode(const int& address): addres
         }
     }
 
-    if(std::is_same<VT, std::string>::value) {
-        for(int i=0; i<m; i++) {
-            std::string *str = (std::string*)&linkSet[i];
-            bool flag = true;
-            for(int j=0; j<V_SIZE; j++) {
-                char c = page[p++];
-                if(c == '\0') flag = false;
-                if(!flag) continue;
-                str->push_back(c);
-            }
-        }
-    } else {
-        for (int i = 0; i <= m; i++) {
-            linkSet[i] = *(VT*)(&page[p]);
-            p += V_SIZE;
-        }
+    for (int i = 0; i <= m; i++) {
+        linkSet[i] = *(int*)(&page[p]);
+        p += 4;
     }
 
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::getNode(const int &address) {
+template<int M_SIZE, typename KT, int K_SIZE>
+BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &address) {
     if(address < 4) {
         throw "invalid address!";
     }
-    static std::map<int, BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>*> map;
+    static std::map<int, BTreeNode<M_SIZE, KT, K_SIZE>*> map;
     if(map.count(address) == 0) {
         delete map[address];
-        map[address] = new BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>(address);
+        map[address] = new BTreeNode<M_SIZE, KT, K_SIZE>(address);
     }
     return map[address];
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::release(const int &address) {
+template<int M_SIZE, typename KT, int K_SIZE>
+BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &address) {
     return nullptr;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-int BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::insert(const KT &key) {
+template<int M_SIZE, typename KT, int K_SIZE>
+int BTreeNode<M_SIZE, KT, K_SIZE>::insert(const KT &key) {
     int pos = 0;
     while(pos < size && key > keySet[pos]) pos++;
     linkSet[size + 1] = linkSet[size];
@@ -126,28 +113,28 @@ int BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::insert(const KT &key) {
     return pos;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-int BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::findPos(const KT &key) {
+template<int M_SIZE, typename KT, int K_SIZE>
+int BTreeNode<M_SIZE, KT, K_SIZE>::findPos(const KT &key) {
     int pos = std::lower_bound(keySet, keySet+size, key) - keySet;
     if(pos == size || keySet[pos] != key) return -1;
     return pos;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-void BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::release() {
-    BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::release(this->address);
+template<int M_SIZE, typename KT, int K_SIZE>
+void BTreeNode<M_SIZE, KT, K_SIZE>::release() {
+    BTreeNode<M_SIZE, KT, K_SIZE>::release(this->address);
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-void BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::clear() {
+template<int M_SIZE, typename KT, int K_SIZE>
+void BTreeNode<M_SIZE, KT, K_SIZE>::clear() {
     for(int i=0; i<m+1; i++) keySet[i].clear(), linkSet[i] = 0;
     size = 0;
     leaf = false;
     parent = 0;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE, typename VT, int V_SIZE>
-int BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::save() {
+template<int M_SIZE, typename KT, int K_SIZE>
+int BTreeNode<M_SIZE, KT, K_SIZE>::save() {
     StoragePage page(address);
     int p = 0;
     page.setIntStartFrom(p, size); p += 4;
@@ -169,17 +156,9 @@ int BTreeNode<M_SIZE, KT, K_SIZE, VT, V_SIZE>::save() {
         }
     }
 
-    if(std::is_same<VT, std::string>::value) {
-        for(int i=0; i<m; i++) {
-            std::string *str = (std::string*)&linkSet[i];
-            page.setStartFrom(p, str->c_str(), str->size());
-            p += V_SIZE;
-        }
-    } else {
-        for (int i = 0; i <= m; i++) {
-            page.setStartFrom(p, &linkSet[i], V_SIZE);
-            p += V_SIZE;
-        }
+    for (int i = 0; i <= m; i++) {
+        page.setStartFrom(p, &linkSet[i], 4);
+        p += 4;
     }
 
     if(p >= 1024) {
