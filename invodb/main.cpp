@@ -4,6 +4,9 @@
 
 #include "main.h"
 
+
+void testAndBenchmark(int n);
+
 int main() {
     int t = time(0);
     //srand(1635418590);
@@ -28,8 +31,71 @@ int main() {
     JSON json("{\"hello\": 1}");
     col->insert(json);
 
-    BTreeUUID *btree = new BTreeUUID(PageManager::Instance().allocate());
-    btree->testAndBenchmark(100000);
+    testAndBenchmark(100000);
+
+    //btree->testAndBenchmark(100000);
 
     return 0;
+}
+
+void testAndBenchmark(int n) {
+
+
+    auto btree = new BTree<15, std::string, 32, double, 8>(PageManager::Instance().allocate());
+    printf("nodeSize: %d\n", btree->getNodeSize());
+
+
+    clock_t start = clock();
+
+    std::map<std::string, double> map;
+
+    for(int i=0; i<n; i++) {
+        int opt = rand() % 4;
+        // insert
+        if(opt <= 1) {
+            std::string uuid = generateUUID();
+            double addr = (double)rand() / 100;
+            btree->insert(uuid, addr);
+            map[uuid] = addr;
+        }
+            // update
+        else if(opt == 2) {
+            if(map.size() == 0) continue;
+            auto it = map.begin();
+            std::advance(it, rand() % map.size());
+            std::string uuid = it->first;
+            double addr = (double)rand() / 100;
+            map[uuid] = addr;
+            btree->update(uuid, addr);
+        }
+            // remove
+        else {
+            if(map.size() == 0) continue;
+            auto it = map.begin();
+            std::advance(it, rand() % map.size());
+            std::string uuid = it->first;
+            map.erase(uuid);
+            btree->remove(uuid);
+        }
+    }
+
+    if(map.size() != btree->size()) {
+        printf("%d %d\n", map.size(), btree->size());
+        printf("BTree has BUG!\n");
+        exit(0);
+    }
+
+    printf("test res k-v: %d\n", map.size());
+
+    for(auto it=map.begin(); it != map.end(); it++) {
+        printf("%llf %llf\n", btree->find(it->first), it->second);
+        if(btree->find(it->first) != it->second) {
+            printf("BTree has BUG!\n");
+            //exit(0);
+        }
+    }
+
+    clock_t end = clock();
+
+    printf("BTree pass the test with n=%d, time=%fs!\n", n, (double)(end - start) / CLOCKS_PER_SEC);
 }

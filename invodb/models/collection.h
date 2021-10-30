@@ -7,7 +7,7 @@
 
 #include "file/page_manager.h"
 #include "utils/logger.h"
-#include "btree/btree_uuid.h"
+#include "btree/btree.h"
 #include "json.h"
 #include <map>
 #include <set>

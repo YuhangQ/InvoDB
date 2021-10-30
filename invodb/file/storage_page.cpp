@@ -43,8 +43,12 @@ void StoragePage::setIntStartFrom(const int& index, const int& value) {
     *((int *)&page[index]) = value;
 }
 
-void StoragePage::setStringStartFrom(const int &index, const char *str) {
-    for(int i=0; i<strlen(str); i++) {
+void StoragePage::setDoubleStartFrom(const int &index, const double &value) {
+    *((double *)&page[index]) = value;
+}
+
+void StoragePage::setStringStartFrom(const int &index, const std::string &str) {
+    for(int i=0; i<str.size(); i++) {
         page[index+i] = str[i];
     }
 }
@@ -58,6 +62,15 @@ int StoragePage::getAddress() {
 }
 
 StoragePage::StoragePage() {
-
+    memset(page, 0, sizeof(page));
 }
 
+double StoragePage::getDoubleStartFrom(const int &index) {
+    return *((const double *)&page[index]);
+}
+
+void StoragePage::setStartFrom(const int &index, const void *content, int size) {
+    for(int i=0; i<size; i++) {
+        page[index+i] = ((const char *)content)[i];
+    }
+}

@@ -11,4 +11,4 @@ include_directories(./invodb)
 
 add_executable(InvoDB
         invodb/main.cpp
-        invodb/main.h invodb/file/page_manager.cpp invodb/file/page_manager.h invodb/models/json.cpp invodb/models/json.h invodb/models/collection.cpp invodb/models/collection.h invodb/file/storage_page.cpp invodb/file/storage_page.h invodb/utils/logger.h invodb/utils/uuid.h invodb/btree/btree_node.h invodb/btree/btree_uuid.cpp invodb/btree/btree_uuid.h invodb/btree/btree_node.cpp)
+        invodb/main.h invodb/file/page_manager.cpp invodb/file/page_manager.h invodb/models/json.cpp invodb/models/json.h invodb/models/collection.cpp invodb/models/collection.h invodb/file/storage_page.cpp invodb/file/storage_page.h invodb/utils/logger.h invodb/utils/uuid.h invodb/btree/node.h invodb/btree/btree.h)
