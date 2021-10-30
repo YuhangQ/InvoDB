@@ -6,17 +6,12 @@
 #define INVODB_JSON_H
 
 #include <string>
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+#include "json/json.hpp"
 
-using namespace rapidjson;
-
-class JSON : public Document {
+class JSON : public nlohmann::json {
 public:
-    JSON(std::string json): Document() { this->Parse(json.c_str()); }
-    JSON(const char *json): Document() { this->Parse(json); }
-    std::string ToString();
+    JSON() {}
+    JSON(std::string j): nlohmann::json(j) {}
 private:
 };
 

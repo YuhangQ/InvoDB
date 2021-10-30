@@ -20,7 +20,6 @@ int main() {
 
     PageManager& manager = PageManager::Instance();
 
-
     Collection *col;
     try {
        col = &Collection::getCollection("hello");
@@ -28,8 +27,10 @@ int main() {
         Collection::createCollection("hello");
     }
 
-    JSON json("{\"hello\": 1}");
-    col->insert(json);
+    JSON j;
+    j["hello"] = 1;
+
+    col->insert(j);
 
     testAndBenchmark(100000);
 

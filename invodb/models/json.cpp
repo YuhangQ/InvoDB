@@ -3,10 +3,3 @@
 //
 
 #include "json.h"
-
-std::string JSON::ToString() {
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    this->Accept(writer);
-    return buffer.GetString();
-}

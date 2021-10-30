@@ -8,7 +8,7 @@
 #include "file/page_manager.h"
 #include "utils/logger.h"
 #include "btree/btree.h"
-#include "json.h"
+#include "models/json.h"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -24,6 +24,9 @@ public:
 private:
     static std::map<std::string, Collection*> map;
     static std::set<int> free;
+
+    BTree<27, std::string, 32> *tree;
+
     Collection(const std::string& name,const int& firstPage);
     Collection() {}
     ~Collection() {}
