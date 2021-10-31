@@ -10,6 +10,7 @@
 #include <map>
 
 #include "storage_page.h"
+#include "json/json.hpp"
 
 class PageManager {
 public:
@@ -21,7 +22,9 @@ public:
     StoragePage getPage(const int &index);
     void setPage(const int &index, const StoragePage &page);
     int allocate();
-    void free(const int &index);
+    void release(const int &index);
+    int saveJSONToFile(const nlohmann::json& json);
+    nlohmann::json readJSONFromFile(const int &index);
 private:
     std::map<int, StoragePage> map;
     std::fstream stream;

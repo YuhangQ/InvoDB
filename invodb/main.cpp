@@ -13,7 +13,7 @@ int main() {
     srand(t);
     printf("seed: %d\n", t);
 
-    //system("rm -rf test.invodb && touch test.invodb");
+    system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
     Collection::loadCollections();
@@ -27,12 +27,17 @@ int main() {
         Collection::createCollection("hello");
     }
 
-    JSON j;
-    j["hello"] = 1;
+    std::string test;
+    for(int i=0; i<100; i++) {
+        test += generateUUID();
+    }
+
+    nlohmann::json j;
+    j["hello"] = test;
 
     col->insert(j);
 
-    testAndBenchmark(100000);
+    //testAndBenchmark(100000);
 
     //btree->testAndBenchmark(100000);
 

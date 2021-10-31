@@ -19,6 +19,7 @@ public:
     int getNodeSize();
     int find(const KT &key);
     int size();
+
 private:
     void removeEntry(int curAdd, const KT& key, const int& pointer);
     bool canCoalesce(int curAdd, int sibAdd);
@@ -38,11 +39,14 @@ private:
 template<int M_SIZE, typename KT, int K_SIZE>
 BTree<M_SIZE, KT, K_SIZE>::BTree(const int& address) {
     root = address;
+
     n_size = 0;
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
 void BTree<M_SIZE, KT, K_SIZE>::insert(const KT &key, const int &value) {
+
+
     if(exists(key)) {
         throw "keySet already exists.";
     }
@@ -275,6 +279,8 @@ void BTree<M_SIZE, KT, K_SIZE>::redistribute(int curAdd, int sibAdd) {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 int BTree<M_SIZE, KT, K_SIZE>::findNode(const KT &key) {
+
+
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
     while(!cur->leaf) {
         for(int i=0; i<cur->size; i++) {
@@ -433,11 +439,7 @@ int BTree<M_SIZE, KT, K_SIZE>::getNodeSize() {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 bool BTree<M_SIZE, KT, K_SIZE>::exists(const KT &key) {
-    auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(findNode(key));
-    for(int i=0; i<cur->size; i++) {
-        if(key == cur->keySet[i]) return true;
-    }
-    return false;
+    return find(key) != -1;
 }
 
 

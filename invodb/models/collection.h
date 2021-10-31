@@ -8,7 +8,7 @@
 #include "file/page_manager.h"
 #include "utils/logger.h"
 #include "btree/btree.h"
-#include "models/json.h"
+#include "json/json.hpp"
 #include <map>
 #include <set>
 #include <algorithm>
@@ -17,7 +17,8 @@
 
 class Collection {
 public:
-    static void insert(JSON &json);
+    void insert(nlohmann::json &json);
+
     static void loadCollections();
     static Collection& getCollection(const std::string& name);
     static Collection& createCollection(const std::string& name);
@@ -25,7 +26,7 @@ private:
     static std::map<std::string, Collection*> map;
     static std::set<int> free;
 
-    BTree<27, std::string, 32> *tree;
+    BTree<3, std::string, 32> *tree;
 
     Collection(const std::string& name,const int& firstPage);
     Collection() {}

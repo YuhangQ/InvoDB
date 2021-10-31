@@ -6,16 +6,25 @@
 
 Collection::Collection(const std::string &name, const int &firstPage) {
     Logger::info<std::string, std::string>("load Collection: ", name);
-    tree = new BTree<27, std::string, 32>(firstPage);
+    tree = new BTree<3, std::string, 32>(firstPage);
 }
 
-void Collection::insert(JSON &json) {
-    if(json["__Invo_ID__"].empty()) {
-        json["__Invo_ID__"] = generateUUID();
+void Collection::insert(nlohmann::json &json) {
+
+    //printf("fuck:%d\n", tree);
+    if(json["__INVO_ID__"].empty()) {
+        json["__INVO_ID__"] = generateUUID();
     }
-    Logger::info<std::string, std::string>("INSERT ", json.dump());
-}
 
+    int add = PageManager::Instance().saveJSONToFile(json);
+
+    std::string id = json["__INVO_ID__"].get<std::string>();
+
+    tree->insert(id, add);
+
+    auto tjson = PageManager::Instance().readJSONFromFile(add);
+    Logger::info<std::string, std::string>("INSERT ", tjson.dump());
+}
 
 std::map<std::string, Collection*> Collection::map;
 std::set<int> Collection::free;
@@ -51,22 +60,21 @@ Collection& Collection::createCollection(const std::string &name) {
     int id = *free.begin();
     free.erase(free.begin());
 
-    printf("id: %d\n", id / 32);
     StoragePage page = PageManager::Instance().getPage(id / 32);
     id %= 32;
 
-    int collectionPage = PageManager::Instance().allocate();
+    StoragePage collectionPage = PageManager::Instance().getPage(PageManager::Instance().allocate());
 
     if(name.size() > 28) {
         throw "too long name of collection";
     }
 
     page.setStringStartFrom(id*32, name.c_str());
-    page.setIntStartFrom(id*32+28, collectionPage);
+    page.setIntStartFrom(id*32+28, collectionPage.getAddress());
     page.print();
     page.save();
 
-    Collection *col = new Collection(name, collectionPage);
+    Collection *col = new Collection(name, collectionPage.getAddress());
 
     map.insert(make_pair(name, col));
 

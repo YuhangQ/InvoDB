@@ -83,6 +83,10 @@ BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &address) {
+
+    std::cout << address << std::endl;
+
+
     if(address < 4) {
         throw "invalid address!";
     }
