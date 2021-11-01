@@ -8,7 +8,7 @@
 #include "btree/node.h"
 #include "utils/uuid.h"
 
-template<int M_SIZE, typename KT, int K_SIZE>
+template<typename KT, int K_SIZE>
 class BTree {
 public:
     BTree(const int& address);
@@ -18,37 +18,35 @@ public:
     bool exists(const KT &key);
     int getNodeSize();
     int find(const KT &key);
+    std::vector<KT> keySet();
+    std::vector<std::pair<KT, int>> all();
     int size();
-
 private:
+    int findNode(const KT &key);
     void removeEntry(int curAdd, const KT& key, const int& pointer);
     bool canCoalesce(int curAdd, int sibAdd);
     void coalesce(int curAdd, int sibAdd);
     bool canRedistribute(int curAdd, int sibAdd);
     void redistribute(int curAdd, int sibAdd);
-    int findNode(const KT &key);
     void split(const KT &key, int address, int parentAdd, int curAdd);
     void insertInternal(const KT &key, int curAdd, int lLeafAdd, int rLeafAdd);
     int root;
     int n_size;
+    static const int M_SIZE = 1000 / (K_SIZE + 4);
 };
 
-// BTree<M_SIZE, KT, K_SIZE> BTreeNode<M_SIZE, KT, K_SIZE>
-
-
-template<int M_SIZE, typename KT, int K_SIZE>
-BTree<M_SIZE, KT, K_SIZE>::BTree(const int& address) {
+template<typename KT, int K_SIZE>
+BTree<KT, K_SIZE>::BTree(const int& address) {
     root = address;
-
     n_size = 0;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::insert(const KT &key, const int &value) {
-
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::insert(const KT &key, const int &value) {
 
     if(exists(key)) {
-        throw "keySet already exists.";
+        update(key, value);
+        return;
     }
 
     n_size++;
@@ -66,28 +64,29 @@ void BTree<M_SIZE, KT, K_SIZE>::insert(const KT &key, const int &value) {
     split(key, value, cur->parent, cur->address);
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::update(const KT &key, const int &value) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::update(const KT &key, const int &value) {
     if(!exists(key)) {
-        throw "keySet doesn't exists.";
+        insert(key, value);
+        return;
     }
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(findNode(key));
     cur->linkSet[cur->findPos(key)] = value;
     cur->save();
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::remove(const KT &key) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::remove(const KT &key) {
     if(!exists(key)) {
-        throw "keySet already exists.";
+        return;
     }
     n_size--;
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(findNode(key));
     removeEntry(cur->address, key, find(key));
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-int BTree<M_SIZE, KT, K_SIZE>::find(const KT &key) {
+template<typename KT, int K_SIZE>
+int BTree<KT, K_SIZE>::find(const KT &key) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(findNode(key));
     for(int i=0; i<cur->size; i++) {
         if(key == cur->keySet[i]) return cur->linkSet[i];
@@ -95,13 +94,13 @@ int BTree<M_SIZE, KT, K_SIZE>::find(const KT &key) {
     return -1;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-int BTree<M_SIZE, KT, K_SIZE>::size() {
+template<typename KT, int K_SIZE>
+int BTree<KT, K_SIZE>::size() {
     return n_size;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::removeEntry(int curAdd, const KT &key, const int &pointer) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::removeEntry(int curAdd, const KT &key, const int &pointer) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     int pos = cur->findPos(key);
     if(pos == -1) return;
@@ -138,8 +137,8 @@ void BTree<M_SIZE, KT, K_SIZE>::removeEntry(int curAdd, const KT &key, const int
     }
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-bool BTree<M_SIZE, KT, K_SIZE>::canCoalesce(int curAdd, int sibAdd) {
+template<typename KT, int K_SIZE>
+bool BTree<KT, K_SIZE>::canCoalesce(int curAdd, int sibAdd) {
     if(sibAdd == 0) return false;
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     auto sib = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sibAdd);
@@ -147,8 +146,8 @@ bool BTree<M_SIZE, KT, K_SIZE>::canCoalesce(int curAdd, int sibAdd) {
     return (cur->size + sib->size <= BTreeNode<M_SIZE, KT, K_SIZE>::m - 1 - !cur->leaf);
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     auto sib = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sibAdd);
     auto parent = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->parent);
@@ -204,8 +203,8 @@ void BTree<M_SIZE, KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
     }
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-bool BTree<M_SIZE, KT, K_SIZE>::canRedistribute(int curAdd, int sibAdd) {
+template<typename KT, int K_SIZE>
+bool BTree<KT, K_SIZE>::canRedistribute(int curAdd, int sibAdd) {
     if(sibAdd == 0) return false;
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     auto sib = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sibAdd);
@@ -213,8 +212,8 @@ bool BTree<M_SIZE, KT, K_SIZE>::canRedistribute(int curAdd, int sibAdd) {
     return sib->size > ((sib->m - !sib->leaf) / 2);
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::redistribute(int curAdd, int sibAdd) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::redistribute(int curAdd, int sibAdd) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     auto sib = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sibAdd);
     auto parent = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->parent);
@@ -277,10 +276,8 @@ void BTree<M_SIZE, KT, K_SIZE>::redistribute(int curAdd, int sibAdd) {
     parent->save();
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-int BTree<M_SIZE, KT, K_SIZE>::findNode(const KT &key) {
-
-
+template<typename KT, int K_SIZE>
+int BTree<KT, K_SIZE>::findNode(const KT &key) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
     while(!cur->leaf) {
         for(int i=0; i<cur->size; i++) {
@@ -297,8 +294,8 @@ int BTree<M_SIZE, KT, K_SIZE>::findNode(const KT &key) {
     return cur->address;
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int curAdd) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int curAdd) {
     auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
 
     cur->linkSet[cur->insert(key)] = address;
@@ -348,8 +345,8 @@ void BTree<M_SIZE, KT, K_SIZE>::split(const KT &key, int address, int parentAdd,
     }
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-void BTree<M_SIZE, KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, int rLeafAdd) {
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, int rLeafAdd) {
     BTreeNode<M_SIZE, KT, K_SIZE> *cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
     BTreeNode<M_SIZE, KT, K_SIZE> *lLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(lLeafAdd);
     BTreeNode<M_SIZE, KT, K_SIZE> *rLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(rLeafAdd);
@@ -431,15 +428,49 @@ void BTree<M_SIZE, KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lL
     }
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-int BTree<M_SIZE, KT, K_SIZE>::getNodeSize() {
+template<typename KT, int K_SIZE>
+int BTree<KT, K_SIZE>::getNodeSize() {
     auto p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
     return p->save();
 }
 
-template<int M_SIZE, typename KT, int K_SIZE>
-bool BTree<M_SIZE, KT, K_SIZE>::exists(const KT &key) {
+template<typename KT, int K_SIZE>
+bool BTree<KT, K_SIZE>::exists(const KT &key) {
     return find(key) != -1;
+}
+
+template<typename KT, int K_SIZE>
+std::vector<KT> BTree<KT, K_SIZE>::keySet() {
+    auto p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
+    while(!p->leaf) {
+        p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->linkSet[0]);
+    }
+    std::vector<KT> v;
+    while(true) {
+        for(int i=0; i<p->size; i++) {
+            v.push_back(p->keySet[0]);
+        }
+        if(p->right == 0) break;
+        p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->right);
+    }
+    return v;
+}
+
+template<typename KT, int K_SIZE>
+std::vector<std::pair<KT, int>> BTree<KT, K_SIZE>::all() {
+    auto p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
+    while(!p->leaf) {
+        p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->linkSet[0]);
+    }
+    std::vector<std::pair<KT, int>> v;
+    while(true) {
+        for(int i=0; i<p->size; i++) {
+            v.push_back(std::make_pair(p->keySet[i], p->linkSet[i]));
+        }
+        if(p->right == 0) break;
+        p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->right);
+    }
+    return v;
 }
 
 

@@ -15,8 +15,8 @@
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
 public:
-    static BTreeNode<M_SIZE, KT, K_SIZE>* getNode(const int &address);
-    static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &address);
+    static BTreeNode<M_SIZE, KT, K_SIZE>* getNode(const int &index);
+    static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &index);
     int insert(KT const &key);
     int findPos(KT const &key);
     void release();
@@ -68,7 +68,7 @@ BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
             }
         }
     } else {
-        for(int i=0; i<=m; i++) {
+        for(int i=0; i<m; i++) {
             keySet[i] = *(KT*)(&page[p]);
             p += K_SIZE;
         }
@@ -82,24 +82,20 @@ BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &address) {
-
-    std::cout << address << std::endl;
-
-
-    if(address < 4) {
+BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &index) {
+    if(index < 4) {
         throw "invalid address!";
     }
     static std::map<int, BTreeNode<M_SIZE, KT, K_SIZE>*> map;
-    if(map.count(address) == 0) {
-        delete map[address];
-        map[address] = new BTreeNode<M_SIZE, KT, K_SIZE>(address);
+    if(map.count(index) == 0) {
+        delete map[index];
+        map[index] = new BTreeNode<M_SIZE, KT, K_SIZE>(index);
     }
-    return map[address];
+    return map[index];
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &address) {
+BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &index) {
     return nullptr;
 }
 
@@ -131,7 +127,21 @@ void BTreeNode<M_SIZE, KT, K_SIZE>::release() {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 void BTreeNode<M_SIZE, KT, K_SIZE>::clear() {
-    for(int i=0; i<m+1; i++) keySet[i].clear(), linkSet[i] = 0;
+    for(int i=0; i<m+1; i++) {
+        if(std::is_same<KT, std::string>::value) {
+            ((std::string *)&keySet[i])->clear();
+        }
+        if(std::is_same<KT, double>::value) {
+            *((double *)&keySet[i]) = 0;
+        }
+        if(std::is_same<KT, bool>::value) {
+            *((bool *)&keySet[i]) = 0;
+        }
+        if(std::is_same<KT, int>::value) {
+            *((int *)&keySet[i]) = 0;
+        }
+        linkSet[i] = 0;
+    }
     size = 0;
     leaf = false;
     parent = 0;
@@ -139,6 +149,8 @@ void BTreeNode<M_SIZE, KT, K_SIZE>::clear() {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 int BTreeNode<M_SIZE, KT, K_SIZE>::save() {
+
+
     StoragePage page(address);
     int p = 0;
     page.setIntStartFrom(p, size); p += 4;
@@ -154,7 +166,7 @@ int BTreeNode<M_SIZE, KT, K_SIZE>::save() {
             p += K_SIZE;
         }
     } else {
-        for(int i=0; i<=m; i++) {
+        for(int i=0; i<m; i++) {
             page.setStartFrom(p, &keySet[i], K_SIZE);
             p += K_SIZE;
         }
@@ -165,7 +177,7 @@ int BTreeNode<M_SIZE, KT, K_SIZE>::save() {
         p += 4;
     }
 
-    if(p >= 1024) {
+    if(p > 1024) {
         throw "too big page!";
     }
 

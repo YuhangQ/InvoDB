@@ -13,9 +13,10 @@ int main() {
     srand(t);
     printf("seed: %d\n", t);
 
-    system("rm -rf test.invodb && touch test.invodb");
+    //system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
+
     Collection::loadCollections();
 
     PageManager& manager = PageManager::Instance();
@@ -25,28 +26,36 @@ int main() {
        col = &Collection::getCollection("hello");
     } catch(const char *error) {
         Collection::createCollection("hello");
+        col = &Collection::getCollection("hello");
     }
 
     std::string test;
     for(int i=0; i<100; i++) {
         test += generateUUID();
     }
-
-    nlohmann::json j;
-    j["hello"] = test;
+    nlohmann::json j = nlohmann::json::parse(R"(
+{
+    "string": "this is a string!",
+    "double": 3.1415,
+    "int": 25565,
+    "bool": true,
+    "child": {
+        "id": 3
+    },
+    "array": ["1", "2", "3"]
+}
+    )");
 
     col->insert(j);
 
-    //testAndBenchmark(100000);
-
-    //btree->testAndBenchmark(100000);
+    col->remove(j);
 
     return 0;
 }
 
 void testAndBenchmark(int n) {
 
-    auto btree = new BTree<27, std::string, 32>(PageManager::Instance().allocate());
+    auto btree = new BTree<std::string, 32>(PageManager::Instance().allocate());
 
     printf("nodeSize: %d\n", btree->getNodeSize());
 
