@@ -29,26 +29,24 @@ int main() {
         col = &Collection::getCollection("hello");
     }
 
-    std::string test;
-    for(int i=0; i<100; i++) {
-        test += generateUUID();
-    }
-    nlohmann::json j = nlohmann::json::parse(R"(
-{
-    "string": "this is a string!",
-    "double": 3.1415,
-    "int": 25565,
-    "bool": true,
-    "child": {
-        "id": 3
-    },
-    "array": ["1", "2", "3"]
-}
-    )");
+    testAndBenchmark(10000);
 
-    col->insert(j);
 
-    col->remove(j);
+//    nlohmann::json j = nlohmann::json::parse(R"(
+//{
+//    "string": "this is a string!",
+//    "double": 3.1415,
+//    "int": 25565,
+//    "bool": true,
+//    "child": {
+//        "id": 3
+//    },
+//    "array": ["1", "2", "3"]
+//    )");
+//
+//    col->insert(j);
+//
+//    col->remove(j);
 
     return 0;
 }

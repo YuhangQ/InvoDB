@@ -68,6 +68,8 @@ Collection &Collection::getCollection(const std::string &name) {
 Collection::Collection(const std::string &name, const int &firstPage) {
     Logger::info<std::string, std::string>("load Collection: ", name);
     index = new BTree<std::string, 128>(firstPage);
+
+
     if(!index->exists("__INVO_ID__")) {
         index->insert("__INVO_ID__", PageManager::Instance().allocate());
     }
@@ -80,6 +82,9 @@ void Collection::insert(nlohmann::json &json) {
     } else {
         remove(json);
     }
+
+
+
     std::string id = json["__INVO_ID__"].get<std::string>();
     int add = PageManager::Instance().saveJSONToFile(json);
     uuid->insert(id, add);
@@ -94,9 +99,10 @@ void Collection::remove(const nlohmann::json &json) {
         throw "no invo_id";
     }
     std::string id = json["__INVO_ID__"].get<std::string>();
-    uuid->remove(id);
+
 
     int address = uuid->find(id);
+    uuid->remove(id);
 
     nlohmann::json jsonInDisk = PageManager::Instance().readJSONFromFile(address);
 
@@ -105,6 +111,7 @@ void Collection::remove(const nlohmann::json &json) {
     PageManager::Instance().release(address);
 }
 
+// age=1  age=“hello”
 void Collection::indexJSON(const std::string prefix, const nlohmann::json &json, const int& address) {
     // even easier with structured bindings (C++17)
     for (auto& [key, value] : json.items()) {
