@@ -13,7 +13,7 @@ int main() {
     srand(t);
     printf("seed: %d\n", t);
 
-    //system("rm -rf test.invodb && touch test.invodb");
+    system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
 
@@ -29,24 +29,31 @@ int main() {
         col = &Collection::getCollection("hello");
     }
 
-    testAndBenchmark(10000);
+    //testAndBenchmark(10000);
 
 
-//    nlohmann::json j = nlohmann::json::parse(R"(
-//{
-//    "string": "this is a string!",
-//    "double": 3.1415,
-//    "int": 25565,
-//    "bool": true,
-//    "child": {
-//        "id": 3
-//    },
-//    "array": ["1", "2", "3"]
-//    )");
-//
-//    col->insert(j);
-//
-//    col->remove(j);
+    nlohmann::json j = nlohmann::json::parse(R"(
+{
+    "string": "this is a string!",
+    "double": 3.1415,
+    "int": 25565,
+    "bool": true,
+    "child": {
+        "id": 3
+    },
+    "array": ["1", "2", "3"]
+    )");
+
+
+    try {
+    col->insert(j);
+    }catch(const char * s ){
+        puts(s);
+    }
+
+    printf("?");
+
+    col->remove(j);
 
     return 0;
 }

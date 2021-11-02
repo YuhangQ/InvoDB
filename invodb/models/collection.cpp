@@ -77,6 +77,8 @@ Collection::Collection(const std::string &name, const int &firstPage) {
 }
 
 void Collection::insert(nlohmann::json &json) {
+
+
     if(json["__INVO_ID__"].empty()) {
         json["__INVO_ID__"] = generateUUID();
     } else {
