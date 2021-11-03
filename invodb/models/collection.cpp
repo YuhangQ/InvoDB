@@ -45,19 +45,17 @@ Collection::Collection(const std::string &name, const int &firstPage) {
 
 void Collection::insert(nlohmann::json &json) {
 
-
     if(json["__INVO_ID__"].empty()) {
         json["__INVO_ID__"] = generateUUID();
     } else {
         remove(json);
     }
 
-
-
     std::string id = json["__INVO_ID__"].get<std::string>();
     int add = PageManager::Instance().saveJSONToFile(json);
     uuid->insert(id, add);
-    Logger::info<std::string, std::string>("INSERT ", json.dump());
+
+    //Logger::info<std::string, std::string>("INSERT ", json.dump());
 
     // add index
     indexJSON("", json, add);
@@ -84,11 +82,13 @@ void Collection::remove(const nlohmann::json &json) {
 void Collection::indexJSON(const std::string prefix, const nlohmann::json &json, const int& address) {
     // even easier with structured bindings (C++17)
     for (auto& [key, value] : json.items()) {
-        std::cout << prefix << key << " : " << value << "\n";
-        if(value.is_string()) insertIndex(prefix + key, value.get<std::string>(), address);
-        if(value.is_number()) insertIndex(prefix + key, value.get<double>(), address);
+        //std::cout << prefix << key << " : " << value << "\n";
+        if(key == "__INVO_ID__") continue;
+
         if(value.is_boolean()) insertIndex(prefix + key, value.get<bool>(), address);
-        if(value.is_object()) indexJSON(prefix + key + ".", value.get<nlohmann::json>(),address);
+        if(value.is_number()) insertIndex(prefix + key, value.get<double>(), address);
+        if(value.is_string()) insertIndex(prefix + key, value.get<std::string>(), address);
+        //if(value.is_object()) indexJSON(prefix + key + ".", value.get<nlohmann::json>(),address);
         if(value.is_array()) {
             for(auto& element : value.get<nlohmann::json>()) {
                 if(element.is_string()) insertIndex(prefix + key, element.get<std::string>(), address);
@@ -100,9 +100,12 @@ void Collection::indexJSON(const std::string prefix, const nlohmann::json &json,
 }
 
 void Collection::insertIndex(const std::string indexName, const std::string indexValue, const int &address) {
-    printf("INDEX: %s = \"%s\" add:(%d)\n", indexName.c_str(), indexValue.c_str(), address);
 
     std::string treeName = indexName + "$string";
+
+
+    //printf("INDEX TO %s: %s = \"%s\" add:(%d)\n", treeName.c_str(), indexName.c_str(), indexValue.c_str(), address);
+
     if(!index->exists(treeName)) {
         index->insert(treeName, PageManager::Instance().allocate());
     }
@@ -115,10 +118,12 @@ void Collection::insertIndex(const std::string indexName, const std::string inde
 
     List<int, 4> list(indexTree.find(indexValue));
     list.insert(address);
+    //printf("INSERT %d INTO %d\n", address, indexTree.find(indexValue));
+    //list.print();
 }
 
 void Collection::insertIndex(const std::string indexName, double indexValue, const int &address) {
-    printf("INDEX: %s = %f add:(%d)\n", indexName.c_str(), indexValue, address);
+    //printf("INDEX: %s = %f add:(%d)\n", indexName.c_str(), indexValue, address);
 
     std::string treeName = indexName + "$number";
     if(!index->exists(treeName)) {
@@ -136,7 +141,7 @@ void Collection::insertIndex(const std::string indexName, double indexValue, con
 }
 
 void Collection::insertIndex(const std::string indexName, bool indexValue, const int &address) {
-    printf("INDEX: %s = %s add:(%d)\n", indexName.c_str(), indexValue ? "true" : "false", address);
+    //printf("INDEX: %s = %s add:(%d)\n", indexName.c_str(), indexValue ? "true" : "false", address);
 
     std::string treeName = indexName + "$boolean";
     if(!index->exists(treeName)) {
@@ -171,7 +176,7 @@ void Collection::clearIndex(const std::string prefix, const nlohmann::json &json
 }
 
 void Collection::removeIndex(const std::string indexName, const std::string indexValue, const int &address) {
-    printf("REMOVE: %s = \"%s\" add:(%d)\n", indexName.c_str(), indexValue.c_str(), address);
+    //printf("REMOVE: %s = \"%s\" add:(%d)\n", indexName.c_str(), indexValue.c_str(), address);
 
     std::string treeName = indexName + "$string";
     if(!index->exists(treeName)) {
@@ -189,7 +194,7 @@ void Collection::removeIndex(const std::string indexName, const std::string inde
 }
 
 void Collection::removeIndex(const std::string indexName, double indexValue, const int &address) {
-    printf("REMOVE: %s = %f add:(%d)\n", indexName.c_str(), indexValue, address);
+    //printf("REMOVE: %s = %f add:(%d)\n", indexName.c_str(), indexValue, address);
 
     std::string treeName = indexName + "$number";
     if(!index->exists(treeName)) {
@@ -207,7 +212,7 @@ void Collection::removeIndex(const std::string indexName, double indexValue, con
 }
 
 void Collection::removeIndex(const std::string indexName, bool indexValue, const int &address) {
-    printf("REMOVE: %s = %s add:(%d)\n", indexName.c_str(), indexValue ? "true" : "false", address);
+    //printf("REMOVE: %s = %s add:(%d)\n", indexName.c_str(), indexValue ? "true" : "false", address);
 
     std::string treeName = indexName + "$boolean";
     if(!index->exists(treeName)) {
@@ -222,4 +227,18 @@ void Collection::removeIndex(const std::string indexName, bool indexValue, const
 
     List<int, 4> list(indexTree.find(indexValue));
     list.remove(address);
+}
+
+void Collection::test() {
+    index->print();
+    auto qq = new BTree<std::string, 128>(8);
+    while(true) {
+        std::string q;
+        std::cin >> q;
+        List<int, 4> list(qq->find(q));
+        //list.print();
+        for(auto& add : list.all()) {
+            std::cout << ">> " << PageManager::Instance().readJSONFromFile(add).dump() << std::endl;
+        }
+    }
 }

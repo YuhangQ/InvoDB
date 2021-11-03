@@ -24,6 +24,9 @@ public:
     static void loadCollections();
     static Collection& getCollection(const std::string& name);
     static Collection& createCollection(const std::string& name);
+
+    void test();
+
 private:
 
     void indexJSON(const std::string prefix, const nlohmann::json &json, const int& address);

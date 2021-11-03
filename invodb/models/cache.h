@@ -17,11 +17,11 @@ public:
         return hash.find(key) != hash.end();
     }
 
-    VT get(KT const &key) {
+    std::shared_ptr<VT> get(KT const &key) {
         if (hash.find(key) == hash.end())
             throw "cache error";
         else {
-            VT value = hash[key]->second;
+            std::shared_ptr<VT> value = hash[key]->second;
             ls.erase(hash[key]);
             ls.push_front(std::make_pair(key, value));
             hash[key] = ls.begin();
@@ -29,7 +29,7 @@ public:
         }
     }
 
-    void put(KT const &key, VT const &value) {
+    void put(KT const &key, std::shared_ptr<VT> const &value) {
         if (hash.find(key) != hash.end()) {
             ls.erase(hash[key]);
         }
@@ -43,8 +43,8 @@ public:
 
 private:
     int capacity;
-    std::list<std::pair<KT, VT>> ls;
-    std::unordered_map<KT, typename std::list<std::pair<KT, VT>>::iterator> hash;
+    std::list<std::pair<KT, std::shared_ptr<VT>>> ls;
+    std::unordered_map<KT, typename std::list<std::pair<KT, std::shared_ptr<VT>>>::iterator> hash;
 };
 
 

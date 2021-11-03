@@ -16,6 +16,9 @@ public:
     void remove(T const& value) {
         tree->remove(value);
     }
+    void print() {
+        tree->print();
+    }
     bool exists(T const& value) {
         return tree->exists(value);
     }

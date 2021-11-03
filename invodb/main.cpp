@@ -9,11 +9,11 @@ void testAndBenchmark(int n);
 
 int main() {
     int t = time(0);
-    //srand(1635418590);
-    srand(t);
+    srand(1635418590);
+    //srand(t);
     printf("seed: %d\n", t);
 
-    system("rm -rf test.invodb && touch test.invodb");
+    //system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
 
@@ -30,34 +30,44 @@ int main() {
     }
 
 
+//    freopen("qq.txt", "r", stdin);
+//    char qq[100], phone[100];
+//    for(int i=0; i<400000; i++) {
+//        if(i % 1000 == 0) printf("[%d/%d] Inserting!\n", i, 400000);
+//        scanf("%s%s", qq, phone);
+//        nlohmann::json json;
+//        json["qq"] = qq;
+//        json["phone"] = phone;
+//        col->insert(json);
+//    }
+
+    col->test();
 
 
-    nlohmann::json j = nlohmann::json::parse(R"(
-{
-    "string": "this is a string!",
-    "double": 3.1415,
-    "int": 25565,
-    "bool": true,
-    "child": {
-        "id": 3
-    },
-    "array": ["1", "2", "3"]
-}
-    )");
+//    nlohmann::json j = nlohmann::json::parse(R"(
+//{
+//    "string": "this is a string!",
+//    "double": 3.1415,
+//    "int": 25565,
+//    "bool": true,
+//    "child": {
+//        "id": 3
+//    },
+//    "array": ["1", "2", "3"]
+//}
+//    )");
 
 
-    col->insert(j);
+    //testAndBenchmark(100000);
 
-    col->remove(j);
 
-    testAndBenchmark(100000);
 
     return 0;
 }
 
 void testAndBenchmark(int n) {
 
-    auto btree = new BTree<std::string, 32>(PageManager::Instance().allocate());
+    auto btree = new BTree<std::string, 128>(PageManager::Instance().allocate());
 
     printf("nodeSize: %d\n", btree->getNodeSize());
 
@@ -67,6 +77,7 @@ void testAndBenchmark(int n) {
 
     for(int i=0; i<n; i++) {
         int opt = rand() % 4;
+
         // insert
         if(opt <= 1) {
             std::string uuid = generateUUID();
@@ -93,6 +104,9 @@ void testAndBenchmark(int n) {
             map.erase(uuid);
             btree->remove(uuid);
         }
+
+        //printf("opt: %d\n", opt);
+        //btree->print();
     }
 
     if(map.size() != btree->size()) {

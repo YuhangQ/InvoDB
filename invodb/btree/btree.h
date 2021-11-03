@@ -22,8 +22,11 @@ public:
     int firstNode();
     std::vector<KT> keySet();
     std::vector<std::pair<KT, int>> all();
+    void print();
+    void innerPrint(const int& t);
     int size();
 private:
+
     void removeEntry(int curAdd, const KT& key, const int& pointer);
     bool canCoalesce(int curAdd, int sibAdd);
     void coalesce(int curAdd, int sibAdd);
@@ -115,11 +118,18 @@ void BTree<KT, K_SIZE>::removeEntry(int curAdd, const KT &key, const int &pointe
     cur->save();
 
     if(curAdd == root && !cur->leaf && cur->size == 0) {
-        root = cur->linkSet[0];
-        auto root = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->linkSet[0]);
-        root->parent = 0;
-        root->save();
-        cur->release();
+//        root = cur->linkSet[0];
+//        auto root = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->linkSet[0]);
+//        root->parent = 0;
+//        root->save();
+//        cur->release();
+        auto rootNode = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->linkSet[0]);
+        *cur =  *rootNode;
+        rootNode->release();
+        cur->parent = 0;
+        cur->address = root;
+        cur->update();
+        cur->save();
         return;
     }
 
@@ -160,7 +170,7 @@ void BTree<KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
             break;
         }
     }
-    BTreeNode<M_SIZE, KT, K_SIZE>* newNode = nullptr;
+
     if(cur->left == sibAdd) {
         if(!cur->leaf) sib->insert(*k);
         for(int i=0; i<cur->size; i++) {
@@ -169,12 +179,12 @@ void BTree<KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
         sib->linkSet[sib->size] = cur->linkSet[cur->size];
         sib->right = cur->right;
         if(cur->right) {
-            BTreeNode<M_SIZE, KT, K_SIZE> *right = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->right);
+            auto right = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(cur->right);
             right->left = sib->address;
             right->save();
         }
-        newNode = sib;
-        newNode->save();
+        sib->update();
+        sib->save();
         removeEntry(parent->address, *k, curAdd);
         cur->release();
     } else {
@@ -187,21 +197,24 @@ void BTree<KT, K_SIZE>::coalesce(int curAdd, int sibAdd) {
         cur->right = sib->right;
 
         if(sib->right) {
-            BTreeNode<M_SIZE, KT, K_SIZE> *right = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sib->right);
+            auto right = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sib->right);
             right->left = cur->address;
             right->save();
         }
-        newNode = cur;
-        newNode->save();
+        cur->update();
+        cur->save();
+
         removeEntry(parent->address, *k, sibAdd);
         sib->release();
     }
+    /*
     if(newNode->leaf) return;
     for(int i=0; i<=newNode->size; i++) {
         auto child = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(newNode->linkSet[i]);
         child->parent = newNode->address;
         child->save();
     }
+     */
 }
 
 template<typename KT, int K_SIZE>
@@ -237,7 +250,7 @@ void BTree<KT, K_SIZE>::redistribute(int curAdd, int sibAdd) {
             parent->keySet[pos] = sib->keySet[sib->size-1];
         }
         if(!cur->leaf) {
-            BTreeNode<M_SIZE, KT, K_SIZE> *child = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sib->linkSet[sib->size - cur->leaf]);
+            auto child = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(sib->linkSet[sib->size - cur->leaf]);
             child->parent = cur->address;
             child->save();
         }
@@ -327,18 +340,32 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
     cur->release();
 
     if(cur->address == root) {
-        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+//        newRoot->insert(rLeaf->keySet[0]);
+//        newRoot->linkSet[0] = lLeaf->address;
+//        newRoot->linkSet[1] = rLeaf->address;
+//        newRoot->leaf = false;
+//        root = newRoot->address;
+//        newRoot->parent = 0;
+//        lLeaf->parent = rLeaf->parent = root;
+//
+//        newRoot->save();
+//        lLeaf->save();
+//        rLeaf->save();
+
+        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
+        newRoot->clear();
         newRoot->insert(rLeaf->keySet[0]);
         newRoot->linkSet[0] = lLeaf->address;
         newRoot->linkSet[1] = rLeaf->address;
         newRoot->leaf = false;
-        root = newRoot->address;
         newRoot->parent = 0;
         lLeaf->parent = rLeaf->parent = root;
 
         newRoot->save();
         lLeaf->save();
         rLeaf->save();
+
     } else {
         lLeaf->save();
         rLeaf->save();
@@ -347,10 +374,40 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
 }
 
 template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::print() {
+    innerPrint(root);
+}
+
+template<typename KT, int K_SIZE>
+void BTree<KT, K_SIZE>::innerPrint(const int& t) {
+    auto p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(t);
+    printf("----------Node: %d----Parent: %d----------\n", p->address, p->parent);
+    for(int i=0; i<p->size; i++) {
+        std::cout << p->keySet[i] << " ";
+    }
+    std::cout << std::endl;
+    for(int i=0; i<=p->size; i++) {
+        std::cout << p->linkSet[i] << " ";
+    }
+    std::cout << std::endl;
+    if(p->leaf) return;
+    for(int i=0; i<=p->size; i++) {
+        auto p2 = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->linkSet[i]);
+        if(p2->parent != p->address) {
+            printf(">>>>>>>>>>>>>>>>>>FUCK");
+            exit(0);
+        }
+
+        innerPrint(p->linkSet[i]);
+    }
+}
+
+
+template<typename KT, int K_SIZE>
 void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, int rLeafAdd) {
-    BTreeNode<M_SIZE, KT, K_SIZE> *cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
-    BTreeNode<M_SIZE, KT, K_SIZE> *lLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(lLeafAdd);
-    BTreeNode<M_SIZE, KT, K_SIZE> *rLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(rLeafAdd);
+    auto cur = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(curAdd);
+    auto lLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(lLeafAdd);
+    auto rLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(rLeafAdd);
 
     if(cur->size < cur->m - 1) {
         int pos = cur->insert(key);
@@ -410,18 +467,34 @@ void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, 
     cur->release();
 
     if(cur->address == root) {
-        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
-        newRoot->insert(cur->keySet[mid]);
+//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+//        newRoot->insert(cur->keySet[mid]);
+//        newRoot->linkSet[0] = newLChild->address;
+//        newRoot->linkSet[1] = newRChild->address;
+//        newRoot->leaf = false;
+//        root = newRoot->address;
+//        newRoot->parent = 0;
+//        newLChild->parent = newRChild->parent = root;
+//
+//        newRoot->save();
+//        newLChild->save();
+//        newRChild->save();
+
+        KT key = cur->keySet[mid];
+
+        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
+        newRoot->clear();
+        newRoot->insert(key);
         newRoot->linkSet[0] = newLChild->address;
         newRoot->linkSet[1] = newRChild->address;
         newRoot->leaf = false;
-        root = newRoot->address;
         newRoot->parent = 0;
         newLChild->parent = newRChild->parent = root;
 
         newRoot->save();
         newLChild->save();
         newRChild->save();
+
     } else {
         newLChild->save();
         newRChild->save();
@@ -449,7 +522,7 @@ std::vector<KT> BTree<KT, K_SIZE>::keySet() {
     std::vector<KT> v;
     while(true) {
         for(int i=0; i<p->size; i++) {
-            v.push_back(p->keySet[0]);
+            v.push_back(p->keySet[i]);
         }
         if(p->right == 0) break;
         p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->right);

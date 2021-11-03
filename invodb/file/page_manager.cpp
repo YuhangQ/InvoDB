@@ -21,9 +21,11 @@ int PageManager::loadDatabase(const char *filename) {
 
 StoragePage PageManager::getPage(const int &index) {
 
+    /*
     if(cache.exist(index)) {
         return cache.get(index);
     }
+     */
 
     StoragePage page(index);
     // 调整指针位置
@@ -34,7 +36,7 @@ StoragePage PageManager::getPage(const int &index) {
 }
 
 void PageManager::setPage(const int &index, const StoragePage &page) {
-    cache.put(index, page);
+    //cache.put(index, page);
     stream.clear();
     stream.seekg(index * 1024);
     stream.write(page, 1024);
@@ -48,6 +50,8 @@ int PageManager::allocate() {
 }
 
 void PageManager::release(const int &index, const bool &next) {
+
+    return;
     auto page = getPage(index);
     freeList->insert(page.getAddress());
     if(next) {

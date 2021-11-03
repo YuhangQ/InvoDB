@@ -11,14 +11,23 @@
 #include <map>
 #include <type_traits>
 #include "file/page_manager.h"
+#include "models/cache.h"
 
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
 public:
-    static BTreeNode<M_SIZE, KT, K_SIZE>* getNode(const int &index);
+    static std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> getNode(const int &index);
     static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &index);
     int insert(KT const &key);
     int findPos(KT const &key);
+    void update() {
+        if(leaf) return;
+        for(int i=0; i<=size; i++) {
+            auto node = getNode(linkSet[i]);
+            node->parent = address;
+            node->save();
+        }
+    }
     void release();
     void clear();
     int save();
@@ -82,16 +91,21 @@ BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
-BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &index) {
+std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &index) {
     if(index == 0) {
         throw "invalid address!";
     }
-    static std::map<int, BTreeNode<M_SIZE, KT, K_SIZE>*> map;
-    if(map.count(index) == 0) {
-        delete map[index];
-        map[index] = new BTreeNode<M_SIZE, KT, K_SIZE>(index);
+    return std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>( BTreeNode<M_SIZE, KT, K_SIZE>(index));
+    static LRUCache<int, BTreeNode<M_SIZE, KT, K_SIZE>> cache(1000000);
+    if(!cache.exist(index)) {
+        auto p = std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>( BTreeNode<M_SIZE, KT, K_SIZE>(index));
+        cache.put(index, p);
+        return p;
+    } else {
+        auto p = cache.get(index);
+        cache.put(index, p);
+        return p;
     }
-    return map[index];
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
@@ -128,7 +142,7 @@ void BTreeNode<M_SIZE, KT, K_SIZE>::release() {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 void BTreeNode<M_SIZE, KT, K_SIZE>::clear() {
-    for(int i=0; i<m+1; i++) {
+    for(int i=0; i<=m; i++) {
         if(std::is_same<KT, std::string>::value) {
             ((std::string *)&keySet[i])->clear();
         }
@@ -144,8 +158,10 @@ void BTreeNode<M_SIZE, KT, K_SIZE>::clear() {
         linkSet[i] = 0;
     }
     size = 0;
-    leaf = false;
+    leaf = true;
     parent = 0;
+    left = 0;
+    right = 0;
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
