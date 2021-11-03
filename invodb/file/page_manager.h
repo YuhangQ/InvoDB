@@ -11,6 +11,7 @@
 
 #include "storage_page.h"
 #include "json/json.hpp"
+#include "models/cache.h"
 
 class PageManager {
 public:
@@ -28,8 +29,9 @@ public:
 private:
     std::map<int, StoragePage> map;
     std::fstream stream;
+    LRUCache<int, StoragePage> cache;
     // 私有化实现单例
-    PageManager() {}
+    PageManager():cache(LRUCache<int, StoragePage>(50000)) {}
     ~PageManager() {}
     PageManager(const PageManager&);
     PageManager& operator=(const PageManager&);

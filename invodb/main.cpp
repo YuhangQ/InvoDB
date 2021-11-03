@@ -29,7 +29,7 @@ int main() {
         col = &Collection::getCollection("hello");
     }
 
-    //testAndBenchmark(10000);
+
 
 
     nlohmann::json j = nlohmann::json::parse(R"(
@@ -42,18 +42,15 @@ int main() {
         "id": 3
     },
     "array": ["1", "2", "3"]
+}
     )");
 
 
-    try {
     col->insert(j);
-    }catch(const char * s ){
-        puts(s);
-    }
-
-    printf("?");
 
     col->remove(j);
+
+    testAndBenchmark(100000);
 
     return 0;
 }

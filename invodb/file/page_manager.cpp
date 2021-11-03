@@ -10,6 +10,13 @@ int PageManager::loadDatabase(const char *filename) {
 }
 
 StoragePage PageManager::getPage(const int &index) {
+
+    if(cache.exist(index)) {
+        static int cnt = 0;
+        printf("%d\n", ++cnt);
+        return cache.get(index);
+    }
+
     StoragePage page(index);
     // 调整指针位置
     stream.clear();
@@ -19,10 +26,12 @@ StoragePage PageManager::getPage(const int &index) {
 }
 
 void PageManager::setPage(const int &index, const StoragePage &page) {
+
+    cache.put(index, page);
+
     stream.clear();
     stream.seekg(index * 1024);
     stream.write(page, 1024);
-    stream.flush();
 }
 
 int PageManager::allocate() {
