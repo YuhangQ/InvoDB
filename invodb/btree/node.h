@@ -83,7 +83,7 @@ BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int &index) {
-    if(index < 4) {
+    if(index == 0) {
         throw "invalid address!";
     }
     static std::map<int, BTreeNode<M_SIZE, KT, K_SIZE>*> map;
@@ -96,6 +96,7 @@ BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::getNode(const int 
 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &index) {
+    PageManager::Instance().release(index);
     return nullptr;
 }
 

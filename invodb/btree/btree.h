@@ -18,11 +18,12 @@ public:
     bool exists(const KT &key);
     int getNodeSize();
     int find(const KT &key);
+    int findNode(const KT &key);
+    int firstNode();
     std::vector<KT> keySet();
     std::vector<std::pair<KT, int>> all();
     int size();
 private:
-    int findNode(const KT &key);
     void removeEntry(int curAdd, const KT& key, const int& pointer);
     bool canCoalesce(int curAdd, int sibAdd);
     void coalesce(int curAdd, int sibAdd);
@@ -471,6 +472,15 @@ std::vector<std::pair<KT, int>> BTree<KT, K_SIZE>::all() {
         p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->right);
     }
     return v;
+}
+
+template<typename KT, int K_SIZE>
+int BTree<KT, K_SIZE>::firstNode() {
+    auto p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(root);
+    while(!p->leaf) {
+        p = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(p->linkSet[0]);
+    }
+    return p.address;
 }
 
 

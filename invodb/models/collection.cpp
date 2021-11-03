@@ -4,57 +4,26 @@
 
 #include "collection.h"
 
+BTree<std::string, 32> Collection::colList(2);
 std::map<std::string, Collection*> Collection::map;
-std::set<int> Collection::free;
 
 void Collection::loadCollections() {
-    // 前四页为集合信息页
-    for (int id = 0; id < 4; id++) {
-        StoragePage page = PageManager::Instance().getPage(id);
-        PageManager::Instance().setPage(id, page);
-        for (int i = 0; i < 32; i++) {
-            int p = i * 32;
-            int len = strlen(&page[p]);
-            std::string name(&page[p], len > 28 ? 28 : len);
-            int firstPage = page.getIntStartFrom(p + 28);
-            // if free
-            if (firstPage == 0) free.insert(id * 32 + i);
-            // not free
-            else map.insert(make_pair(name, new Collection(name, firstPage)));
-        }
+    int cnt = 0;
+    for(auto& key : colList.keySet()) {
+        map.insert(std::make_pair(key, new Collection(key, colList.find(key))));
+        cnt++;
     }
-    Logger::info<std::string, int>("Successfully load Collections: ", 128 - free.size());
+    Logger::info<std::string, int>("Successfully load Collections: ", cnt);
 }
 
 Collection& Collection::createCollection(const std::string &name) {
     // exist
     if(map.count(name) != 0) {
-        throw "collection has already exist";
+        return *map[name];
     }
-    // no free line
-    if(free.size() == 0) {
-        throw "you are reach the max limit count of collections";
-    }
-    int id = *free.begin();
-    free.erase(free.begin());
-
-    StoragePage page = PageManager::Instance().getPage(id / 32);
-    id %= 32;
-
-    StoragePage collectionPage = PageManager::Instance().getPage(PageManager::Instance().allocate());
-
-    if(name.size() > 28) {
-        throw "too long name of collection";
-    }
-
-    page.setStringStartFrom(id*32, name.c_str());
-    page.setIntStartFrom(id*32+28, collectionPage.getAddress());
-    page.save();
-
-    Collection *col = new Collection(name, collectionPage.getAddress());
-
+    colList.insert(name, PageManager::Instance().allocate());
+    Collection *col = new Collection(name, colList.find(name));
     map.insert(make_pair(name, col));
-
     return *col;
 }
 
@@ -68,8 +37,6 @@ Collection &Collection::getCollection(const std::string &name) {
 Collection::Collection(const std::string &name, const int &firstPage) {
     Logger::info<std::string, std::string>("load Collection: ", name);
     index = new BTree<std::string, 128>(firstPage);
-
-
     if(!index->exists("__INVO_ID__")) {
         index->insert("__INVO_ID__", PageManager::Instance().allocate());
     }

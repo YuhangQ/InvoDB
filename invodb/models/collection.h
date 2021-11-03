@@ -36,7 +36,7 @@ private:
     void removeIndex(const std::string indexName, bool indexValue, const int& address);
 
     static std::map<std::string, Collection*> map;
-    static std::set<int> free;
+    static BTree<std::string, 32> colList;
 
     BTree<std::string, 32> *uuid;
     BTree<std::string, 128> *index;

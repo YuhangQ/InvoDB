@@ -13,6 +13,9 @@
 #include "json/json.hpp"
 #include "models/cache.h"
 
+template<typename T, int T_SIZE>
+class List;
+
 class PageManager {
 public:
     static PageManager& Instance() {
@@ -23,15 +26,16 @@ public:
     StoragePage getPage(const int &index);
     void setPage(const int &index, const StoragePage &page);
     int allocate();
-    void release(const int &index);
+    void release(const int &index, const bool &next = true);
     int saveJSONToFile(const nlohmann::json& json);
     nlohmann::json readJSONFromFile(const int &index);
 private:
+    static List<int, 4> *freeList;
     std::map<int, StoragePage> map;
     std::fstream stream;
     LRUCache<int, StoragePage> cache;
     // 私有化实现单例
-    PageManager():cache(LRUCache<int, StoragePage>(50000)) {}
+    PageManager():cache(LRUCache<int, StoragePage>(1000)) {}
     ~PageManager() {}
     PageManager(const PageManager&);
     PageManager& operator=(const PageManager&);

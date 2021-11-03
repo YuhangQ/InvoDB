@@ -3,17 +3,25 @@
 //
 
 #include "page_manager.h"
+#include "btree/list.h"
+
+List<int, 4>* PageManager::freeList = new List<int, 4>(1);
 
 int PageManager::loadDatabase(const char *filename) {
     Instance().stream.open(filename);
+    Instance().stream.seekp(0, std::ios::end);
+    int index = Instance().stream.tellp() / 1024;
+    if(index == 0) {
+        StoragePage(0).save();
+        StoragePage(1).save();
+        StoragePage(2).save();
+    }
     return 0;
 }
 
 StoragePage PageManager::getPage(const int &index) {
 
     if(cache.exist(index)) {
-        static int cnt = 0;
-        printf("%d\n", ++cnt);
         return cache.get(index);
     }
 
@@ -26,9 +34,7 @@ StoragePage PageManager::getPage(const int &index) {
 }
 
 void PageManager::setPage(const int &index, const StoragePage &page) {
-
     cache.put(index, page);
-
     stream.clear();
     stream.seekg(index * 1024);
     stream.write(page, 1024);
@@ -41,8 +47,15 @@ int PageManager::allocate() {
     return index;
 }
 
-void PageManager::release(const int &index) {
-
+void PageManager::release(const int &index, const bool &next) {
+    auto page = getPage(index);
+    freeList->insert(page.getAddress());
+    if(next) {
+        while(page.next()) {
+            freeList->insert(page.next());
+            page = getPage(page.next());
+        }
+    }
 }
 
 nlohmann::json PageManager::readJSONFromFile(const int &index) {
@@ -83,9 +96,6 @@ int PageManager::saveJSONToFile(const nlohmann::json& json) {
             page.save();
         }
     }
-
-
-
     return res;
 }
 
