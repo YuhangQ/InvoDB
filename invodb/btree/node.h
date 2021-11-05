@@ -16,6 +16,7 @@
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
 public:
+    BTreeNode(const int& address);
     static std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> getNode(const int &index);
     static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &index);
     int insert(KT const &key);
@@ -50,8 +51,6 @@ public:
     bool leaf;
     int size;
     int address;
-private:
-    BTreeNode(const int& address);
 };
 
 template<int M_SIZE, typename KT, int K_SIZE>
@@ -95,17 +94,7 @@ std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> BTreeNode<M_SIZE, KT, K_SIZE>::ge
     if(index == 0) {
         throw "invalid address!";
     }
-    return std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>( BTreeNode<M_SIZE, KT, K_SIZE>(index));
-    static LRUCache<int, BTreeNode<M_SIZE, KT, K_SIZE>> cache(1000000);
-    if(!cache.exist(index)) {
-        auto p = std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>( BTreeNode<M_SIZE, KT, K_SIZE>(index));
-        cache.put(index, p);
-        return p;
-    } else {
-        auto p = cache.get(index);
-        cache.put(index, p);
-        return p;
-    }
+    return std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>(index);
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>

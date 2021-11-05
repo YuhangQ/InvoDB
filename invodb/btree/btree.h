@@ -15,6 +15,7 @@ public:
     void insert(const KT &key, const int &value);
     void update(const KT &key, const int &value);
     void remove(const KT &key);
+
     bool exists(const KT &key);
     int getNodeSize();
     int find(const KT &key);
@@ -337,7 +338,7 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
         curRight->save();
     }
 
-    cur->release();
+
 
     if(cur->address == root) {
 //        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
@@ -370,6 +371,7 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
         lLeaf->save();
         rLeaf->save();
         insertInternal(rLeaf->keySet[0], cur->parent, lLeaf->address, rLeaf->address);
+        cur->release();
     }
 }
 
@@ -464,7 +466,7 @@ void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, 
         child->save();
     }
 
-    cur->release();
+
 
     if(cur->address == root) {
 //        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
@@ -499,6 +501,7 @@ void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, 
         newLChild->save();
         newRChild->save();
         insertInternal(cur->keySet[mid], cur->parent, newLChild->address, newRChild->address);
+        cur->release();
     }
 }
 

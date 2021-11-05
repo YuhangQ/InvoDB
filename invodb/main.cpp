@@ -13,7 +13,7 @@ int main() {
     //srand(t);
     printf("seed: %d\n", t);
 
-    //system("rm -rf test.invodb && touch test.invodb");
+    system("rm -rf test.invodb && touch test.invodb");
 
     PageManager::loadDatabase("test.invodb");
 
@@ -41,7 +41,7 @@ int main() {
 //        col->insert(json);
 //    }
 
-    col->test();
+    //col->test();
 
 
 //    nlohmann::json j = nlohmann::json::parse(R"(
@@ -57,10 +57,7 @@ int main() {
 //}
 //    )");
 
-
-    //testAndBenchmark(100000);
-
-
+    testAndBenchmark(50000);
 
     return 0;
 }
@@ -77,6 +74,10 @@ void testAndBenchmark(int n) {
 
     for(int i=0; i<n; i++) {
         int opt = rand() % 4;
+
+        if(i%(n/100) == 0) {
+            printf("[%d/%d] eeeeee\n", i, n);
+        }
 
         // insert
         if(opt <= 1) {

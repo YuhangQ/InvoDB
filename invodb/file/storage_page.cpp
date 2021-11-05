@@ -74,3 +74,7 @@ void StoragePage::setStartFrom(const int &index, const void *content, int size) 
         page[index+i] = ((const char *)content)[i];
     }
 }
+
+void StoragePage::clear() {
+    memset(page, 0, sizeof(page));
+}

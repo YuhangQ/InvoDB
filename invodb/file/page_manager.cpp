@@ -5,7 +5,7 @@
 #include "page_manager.h"
 #include "btree/list.h"
 
-List<int, 4>* PageManager::freeList = new List<int, 4>(1);
+
 
 int PageManager::loadDatabase(const char *filename) {
     Instance().stream.open(filename);
@@ -19,60 +19,76 @@ int PageManager::loadDatabase(const char *filename) {
     return 0;
 }
 
-StoragePage PageManager::getPage(const int &index) {
+std::shared_ptr<StoragePage> PageManager::getPage(const int &index) {
 
-    /*
     if(cache.exist(index)) {
         return cache.get(index);
     }
-     */
 
-    StoragePage page(index);
+    auto page = std::make_shared<StoragePage>(index);
     // 调整指针位置
     stream.clear();
-    stream.seekg(index * 1024);
-    stream.read(page, 1024);
+    stream.seekg((long long)index * 1024);
+    stream.read(*page, 1024);
     return page;
 }
 
 void PageManager::setPage(const int &index, const StoragePage &page) {
-    //cache.put(index, page);
+    cache.put(index, std::make_shared<StoragePage>(page));
+
     stream.clear();
-    stream.seekg(index * 1024);
+    stream.seekg((long long)index * 1024);
     stream.write(page, 1024);
 }
 
 int PageManager::allocate() {
+
+//     try to allocate from free block list
+    auto page = getPage(0);
+    int index =  page->getIntStartFrom(0);
+    if(index != 0) {
+        auto allocatePage = getPage(index);
+
+        page->setIntStartFrom(0, allocatePage->next());
+        // reset
+        allocatePage->clear();
+        allocatePage->save();
+        page->save();
+        //printf("allocate: %d\n", index);
+        return index;
+    }
+
+
+    // allocate block at the end
     stream.seekp(0, std::ios::end);
-    int index = stream.tellp() / 1024;
+    index = stream.tellp() / 1024;
     setPage(index, StoragePage(index));
     return index;
 }
 
 void PageManager::release(const int &index, const bool &next) {
+    auto page = getPage(0);
+    int head = page->getIntStartFrom(0);
+    auto releasePage = getPage(index);
+    releasePage->setNext(head);
+    page->setIntStartFrom(0, releasePage->getAddress());
+    page->save();
+    releasePage->save();
+    //printf("release: %d\n", index);
 
-    return;
-    auto page = getPage(index);
-    freeList->insert(page.getAddress());
-    if(next) {
-        while(page.next()) {
-            freeList->insert(page.next());
-            page = getPage(page.next());
-        }
-    }
 }
 
 nlohmann::json PageManager::readJSONFromFile(const int &index) {
     std::string content;
 
-    StoragePage page = getPage(index);
+    auto page = getPage(index);
     while(true) {
         for(int i=0; i<1016; i++) {
-            if(page[i] == '\0') break;
-            content.push_back(page[i]);
+            if((*page)[i] == '\0') break;
+            content.push_back((*page)[i]);
         }
-        if(page.next() == 0) break;
-        page = getPage(page.next());
+        if(page->next() == 0) break;
+        page = getPage(page->next());
     }
 
     return nlohmann::json::parse(content);
@@ -82,22 +98,22 @@ int PageManager::saveJSONToFile(const nlohmann::json& json) {
     std::string content = json.dump();
     int size = content.size();
 
-    StoragePage page = getPage(allocate());
-    int res = page.getAddress();
+    auto page = getPage(allocate());
+    int res = page->getAddress();
     int p = 0;
     while(p < size) {
         int len = std::min(size - p, 1016);
-        page.setStartFrom(0, &content.c_str()[p], len);
-        page.save();
+        page->setStartFrom(0, &content.c_str()[p], len);
+        page->save();
         p += len;
         if(p < size) {
             int newPage = allocate();
-            int lastPage = page.getAddress();
-            page.setNext(newPage);
-            page.save();
+            int lastPage = page->getAddress();
+            page->setNext(newPage);
+            page->save();
             page = getPage(newPage);
-            page.setLast(lastPage);
-            page.save();
+            page->setLast(lastPage);
+            page->save();
         }
     }
     return res;
