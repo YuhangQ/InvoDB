@@ -30,16 +30,23 @@ int main() {
     }
 
 
-//    freopen("qq.txt", "r", stdin);
-//    char qq[100], phone[100];
-//    for(int i=0; i<400000; i++) {
-//        if(i % 1000 == 0) printf("[%d/%d] Inserting!\n", i, 400000);
-//        scanf("%s%s", qq, phone);
-//        nlohmann::json json;
-//        json["qq"] = qq;
-//        json["phone"] = phone;
-//        col->insert(json);
-//    }
+    freopen("qq.txt", "r", stdin);
+    const int n = 1000000;
+    char qq[100], phone[100];
+
+    clock_t start = clock();
+    for(int i=0; i<n; i++) {
+        scanf("%s%s", qq, phone);
+        nlohmann::json json;
+        json["qq"] = qq;
+        json["phone"] = phone;
+        col->insert(json);
+
+        if(i % (n/1000) == 0) {
+            printf("[%d/%d] time=%fs!\n", i, n, (double)(clock() - start) / CLOCKS_PER_SEC);
+            start = clock();
+        }
+    }
 
     //col->test();
 
@@ -57,7 +64,7 @@ int main() {
 //}
 //    )");
 
-    testAndBenchmark(50000);
+    testAndBenchmark(20000);
 
     return 0;
 }

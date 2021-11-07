@@ -7,6 +7,7 @@
 
 #include <list>
 #include <map>
+#include "invodb/file/storage_page.h"
 
 template<typename KT, typename VT>
 class LRUCache {
@@ -17,11 +18,16 @@ public:
         return hash.find(key) != hash.end();
     }
 
-    std::shared_ptr<VT> get(KT const &key) {
+    void remove(KT const &key) {
+        ls.erase(hash[key]);
+        hash.erase(key);
+    }
+
+    VT get(KT const &key) {
         if (hash.find(key) == hash.end())
             throw "cache error";
         else {
-            std::shared_ptr<VT> value = hash[key]->second;
+            VT value = hash[key]->second;
             ls.erase(hash[key]);
             ls.push_front(std::make_pair(key, value));
             hash[key] = ls.begin();
@@ -29,22 +35,27 @@ public:
         }
     }
 
-    void put(KT const &key, std::shared_ptr<VT> const &value) {
+    VT put(KT const &key, VT const &value) {
+        VT res;
         if (hash.find(key) != hash.end()) {
             ls.erase(hash[key]);
         }
         else if (ls.size() >= capacity) {
+            res = ls.back().second;
+            printf("fuck\n");
+            exit(0);
             hash.erase(ls.back().first);
             ls.pop_back();
         }
         ls.push_front(std::make_pair(key, value));
         hash[key] = ls.begin();
+        return res;
     }
 
 private:
     int capacity;
-    std::list<std::pair<KT, std::shared_ptr<VT>>> ls;
-    std::unordered_map<KT, typename std::list<std::pair<KT, std::shared_ptr<VT>>>::iterator> hash;
+    std::list<std::pair<KT, VT>> ls;
+    std::unordered_map<KT, typename std::list<std::pair<KT, VT>>::iterator> hash;
 };
 
 

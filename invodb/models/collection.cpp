@@ -4,7 +4,7 @@
 
 #include "collection.h"
 
-BTree<std::string, 32> Collection::colList(2);
+BTree<std::string, 32> Collection::colList(1);
 std::map<std::string, Collection*> Collection::map;
 
 void Collection::loadCollections() {
@@ -231,7 +231,7 @@ void Collection::removeIndex(const std::string indexName, bool indexValue, const
 
 void Collection::test() {
     index->print();
-    auto qq = new BTree<std::string, 128>(8);
+    auto qq = new BTree<std::string, 128>(7);
     while(true) {
         std::string q;
         std::cin >> q;

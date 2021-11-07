@@ -2,6 +2,9 @@
 // Created by i on 2021/10/24.
 //
 
+
+#define UNLIMITED_MEMORY true
+
 #ifndef INVODB_NODE_H
 #define INVODB_NODE_H
 
@@ -11,38 +14,30 @@
 #include <map>
 #include <type_traits>
 #include "file/page_manager.h"
-#include "models/cache.h"
+#include "invodb/models/cache.h"
 
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
 public:
-    BTreeNode(const int& address);
-    static std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> getNode(const int &index);
-    static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &index);
-    int insert(KT const &key);
-    int findPos(KT const &key);
-    void update() {
-        if(leaf) return;
-        for(int i=0; i<=size; i++) {
-            auto node = getNode(linkSet[i]);
-            node->parent = address;
-            node->save();
-        }
-    }
-    void release();
-    void clear();
-    int save();
+
     static const int m = M_SIZE;
     static const int maxCount = m - 1;
     static const int minLeafCount = m / 2;
     static const int minLinkCount = (m - 1) / 2;
-    bool enough() {
-        if(leaf) return size >= minLeafCount;
-        else return size >= minLinkCount;
-    }
-    bool full() {
-        return size == maxCount;
-    }
+    static std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> getNode(const int &index);
+    static BTreeNode<M_SIZE, KT, K_SIZE>* release(const int &index);
+
+    BTreeNode(const int& address);
+
+    int insert(KT const &key);
+    int findPos(KT const &key);
+    void update();
+    void release();
+    void clear();
+    int save();
+    bool enough();
+    bool full();
+
     KT keySet[m + 1];
     int linkSet[m + 1];
     int parent;
@@ -51,7 +46,16 @@ public:
     bool leaf;
     int size;
     int address;
+private:
+    //static std::map<int, std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>>> cache;
+    static LRUCache<int, std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>>> cache;
 };
+
+//template<int M_SIZE, typename KT, int K_SIZE>
+//std::map<int, std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>>> BTreeNode<M_SIZE, KT, K_SIZE>::cache;
+
+template<int M_SIZE, typename KT, int K_SIZE>
+LRUCache<int, std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>>> BTreeNode<M_SIZE, KT, K_SIZE>::cache(100000);
 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
@@ -94,11 +98,26 @@ std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> BTreeNode<M_SIZE, KT, K_SIZE>::ge
     if(index == 0) {
         throw "invalid address!";
     }
+//    if(!cache.exist(index)) {
+//        auto p = std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>(index);
+//        cache.put(index, p);
+//        return p;
+//    } else {
+//        auto p = cache.get(index);
+//        cache.put(index, p);
+//        return p;
+//    }
+
     return std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>(index);
+
+//    if(cache.count(index) == 0) {
+//        cache[index] = std::make_shared<BTreeNode<M_SIZE, KT, K_SIZE>>(index);
+//    }
 }
 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &index) {
+    //cache.remove(index);
     PageManager::Instance().release(index);
     return nullptr;
 }
@@ -190,6 +209,27 @@ int BTreeNode<M_SIZE, KT, K_SIZE>::save() {
     page.save();
 
     return p;
+}
+
+template<int M_SIZE, typename KT, int K_SIZE>
+void BTreeNode<M_SIZE, KT, K_SIZE>::update() {
+    if(leaf) return;
+    for(int i=0; i<=size; i++) {
+        auto node = getNode(linkSet[i]);
+        node->parent = address;
+        node->save();
+    }
+}
+
+template<int M_SIZE, typename KT, int K_SIZE>
+bool BTreeNode<M_SIZE, KT, K_SIZE>::enough() {
+    if(leaf) return size >= minLeafCount;
+    else return size >= minLinkCount;
+}
+
+template<int M_SIZE, typename KT, int K_SIZE>
+bool BTreeNode<M_SIZE, KT, K_SIZE>::full() {
+    return size == maxCount;
 }
 
 #endif //INVODB_NODE_H
