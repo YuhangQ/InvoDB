@@ -7,6 +7,52 @@
 
 void testAndBenchmark(int n);
 
+Collection *col;
+
+void terminal() {
+    printf("--------INVODB TERMINAL--------\n");
+    printf("insert\t<JSON>\tinsert a one line json to database.\n");
+    printf("query\t<JSON>\tquery all jsons satisfying the query json.\n");
+    printf("-------------------------------\n");
+
+    while(true) {
+        std::string input;
+        printf("INVODB > ");
+        std::getline(std::cin, input);
+        if(input.size() == 0) continue;
+        if(input.find("insert ") == 0) {
+            input = input.substr(7, input.size());
+
+            nlohmann::json json;
+            try {
+                json = nlohmann::json::parse(input);
+            } catch(...) {
+                printf("ERROR: your insert input isn't a json.\n");
+                continue;
+            }
+            col->insert(json);
+            printf("You insert json: %s\n", json.dump().c_str());
+
+        } else if(input.find("query ") == 0) {
+            input = input.substr(6, input.size());
+            nlohmann::json json;
+            try {
+                json = nlohmann::json::parse(input);
+            } catch(...) {
+                printf("ERROR: your query input isn't a json.\n");
+                continue;
+            }
+
+            auto res = col->query(json);
+
+            printf("query result: \n");
+            for(auto& j : res) {
+                printf(" - %s\n", j.dump().c_str());
+            }
+        }
+    }
+}
+
 int main() {
     int t = time(0);
     srand(1635418590);
@@ -21,7 +67,6 @@ int main() {
 
     PageManager& manager = PageManager::Instance();
 
-    Collection *col;
     try {
        col = &Collection::getCollection("hello");
     } catch(const char *error) {
@@ -29,32 +74,34 @@ int main() {
         col = &Collection::getCollection("hello");
     }
 
-    nlohmann::json j = nlohmann::json::parse(R"(
-{
-        "title" : "MongoDB 教程",
-        "description" : "MongoDB 是一个 Nosql 数据库",
-        "by" : "菜鸟教程",
-        "url" : "http://www.runoob.com",
-        "tags" : [
-                "mongodb",
-                "database",
-                "NoSQL"
-        ],
-        "likes" : 100
-}
-    )");
+//    nlohmann::json j = nlohmann::json::parse(R"(
+//{
+//        "title" : "MongoDB 教程",
+//        "description" : "MongoDB 是一个 Nosql 数据库",
+//        "by" : "菜鸟教程",
+//        "url" : "http://www.runoob.com",
+//        "tags" : [
+//                "mongodb",
+//                "database",
+//                "NoSQL"
+//        ],
+//        "likes" : 100
+//}
+//    )");
+//
+//    col->insert(j);
+//
+//    col->query(nlohmann::json::parse(R"(
+//{
+//	"likes": {"$gt":50},
+//	"$or": [
+//		{"by": "菜鸟教程"},
+//		{"title": "MongoDB 教程"}
+//	]
+//}
+//    )"));
 
-    col->insert(j);
-
-    col->query(nlohmann::json::parse(R"(
-{
-	"likes": {"$gt":50},
-	"$or": [
-		{"by": "菜鸟教程"},
-		{"title": "MongoDB 教程"}
-	]
-}
-    )"));
+    terminal();
 
 
 //    freopen("qq.txt", "r", stdin);

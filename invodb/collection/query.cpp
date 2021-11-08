@@ -6,9 +6,9 @@
 
 std::vector<nlohmann::json> Collection::query(const nlohmann::json &json) {
     std::vector<nlohmann::json> res;
-
-    innerQuery("", json);
-
+    for(auto& json : innerQuery("", json)) {
+        res.push_back(json);
+    }
     return res;
 }
 
@@ -26,7 +26,7 @@ std::vector<nlohmann::json> Collection::query(const nlohmann::json &json) {
 
 std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, const nlohmann::json &json) {
 
-    printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
+    //printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
 
     std::set<nlohmann::json> set;
 
