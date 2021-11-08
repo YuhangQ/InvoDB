@@ -14,7 +14,7 @@
 #include <map>
 #include <type_traits>
 #include "file/page_manager.h"
-#include "invodb/models/cache.h"
+#include "invodb/utils/cache.h"
 
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
@@ -37,6 +37,7 @@ public:
     int save();
     bool enough();
     bool full();
+    void print();
 
     KT keySet[m + 1];
     int linkSet[m + 1];
@@ -230,6 +231,21 @@ bool BTreeNode<M_SIZE, KT, K_SIZE>::enough() {
 template<int M_SIZE, typename KT, int K_SIZE>
 bool BTreeNode<M_SIZE, KT, K_SIZE>::full() {
     return size == maxCount;
+}
+
+template<int M_SIZE, typename KT, int K_SIZE>
+void BTreeNode<M_SIZE, KT, K_SIZE>::print() {
+
+    printf("----Node: %d-----\n", address);
+
+    for(int i=0; i<size; i++) {
+        std::cout << keySet[i] << " ";
+    }
+    std::cout << std::endl;
+    for(int i=0; i<=size-leaf; i++) {
+        printf("%d ", linkSet[i]);
+    }
+    std::cout << std::endl;
 }
 
 #endif //INVODB_NODE_H

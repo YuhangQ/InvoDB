@@ -29,42 +29,58 @@ int main() {
         col = &Collection::getCollection("hello");
     }
 
+    nlohmann::json j = nlohmann::json::parse(R"(
+{
+        "title" : "MongoDB 教程",
+        "description" : "MongoDB 是一个 Nosql 数据库",
+        "by" : "菜鸟教程",
+        "url" : "http://www.runoob.com",
+        "tags" : [
+                "mongodb",
+                "database",
+                "NoSQL"
+        ],
+        "likes" : 100
+}
+    )");
 
-    freopen("qq.txt", "r", stdin);
-    const int n = 1000000;
-    char qq[100], phone[100];
+    col->insert(j);
 
-    clock_t start = clock();
-    for(int i=0; i<n; i++) {
-        scanf("%s%s", qq, phone);
-        nlohmann::json json;
-        json["qq"] = qq;
-        json["phone"] = phone;
-        col->insert(json);
+    col->query(nlohmann::json::parse(R"(
+{
+	"likes": {"$gt":50},
+	"$or": [
+		{"by": "菜鸟教程"},
+		{"title": "MongoDB 教程"}
+	]
+}
+    )"));
 
-        if(i % (n/1000) == 0) {
-            printf("[%d/%d] time=%fs!\n", i, n, (double)(clock() - start) / CLOCKS_PER_SEC);
-            start = clock();
-        }
-    }
+
+//    freopen("qq.txt", "r", stdin);
+//    const int n = 1000000;
+//    char qq[100], phone[100];
+//
+//    clock_t start = clock();
+//    for(int i=0; i<n; i++) {
+//        scanf("%s%s", qq, phone);
+//        nlohmann::json json;
+//        json["qq"] = qq;
+//        json["phone"] = phone;
+//        col->insert(json);
+//
+//        if(i % (n/1000) == 0) {
+//            printf("[%d/%d] time=%fs!\n", i, n, (double)(clock() - start) / CLOCKS_PER_SEC);
+//            start = clock();
+//        }
+//    }
 
     //col->test();
 
 
-//    nlohmann::json j = nlohmann::json::parse(R"(
-//{
-//    "string": "this is a string!",
-//    "double": 3.1415,
-//    "int": 25565,
-//    "bool": true,
-//    "child": {
-//        "id": 3
-//    },
-//    "array": ["1", "2", "3"]
-//}
-//    )");
 
-    testAndBenchmark(20000);
+
+    //testAndBenchmark(20000);
 
     return 0;
 }

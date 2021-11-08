@@ -8,14 +8,18 @@
 #include "btree/node.h"
 #include "utils/uuid.h"
 
+#define M_SIZE 1000 / (K_SIZE + 4)
+
 template<typename KT, int K_SIZE>
 class BTree {
 public:
+
+    static std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> getNode(const int &index);
+
     BTree(const int& address);
     void insert(const KT &key, const int &value);
     void update(const KT &key, const int &value);
     void remove(const KT &key);
-
     bool exists(const KT &key);
     int getNodeSize();
     int find(const KT &key);
@@ -37,8 +41,14 @@ private:
     void insertInternal(const KT &key, int curAdd, int lLeafAdd, int rLeafAdd);
     int root;
     int n_size;
-    static const int M_SIZE = 1000 / (K_SIZE + 4);
+
 };
+
+
+template<typename KT, int K_SIZE>
+std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> BTree<KT, K_SIZE>::getNode(const int &index) {
+    return BTreeNode<M_SIZE, KT, K_SIZE>::getNode(index);
+}
 
 template<typename KT, int K_SIZE>
 BTree<KT, K_SIZE>::BTree(const int& address) {

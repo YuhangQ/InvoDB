@@ -11,7 +11,7 @@
 
 #include "storage_page.h"
 #include "json/json.hpp"
-#include "invodb/models/cache.h"
+#include "invodb/utils/cache.h"
 
 template<typename T, int T_SIZE>
 class List;

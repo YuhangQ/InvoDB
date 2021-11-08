@@ -1,82 +1,8 @@
 //
-// Created by YuhangQ on 2021/10/9.
+// Created by YuhangQ on 2021/11/7.
 //
 
 #include "collection.h"
-
-BTree<std::string, 32> Collection::colList(1);
-std::map<std::string, Collection*> Collection::map;
-
-void Collection::loadCollections() {
-    int cnt = 0;
-    for(auto& key : colList.keySet()) {
-        map.insert(std::make_pair(key, new Collection(key, colList.find(key))));
-        cnt++;
-    }
-    Logger::info<std::string, int>("Successfully load Collections: ", cnt);
-}
-
-Collection& Collection::createCollection(const std::string &name) {
-    // exist
-    if(map.count(name) != 0) {
-        return *map[name];
-    }
-    colList.insert(name, PageManager::Instance().allocate());
-    Collection *col = new Collection(name, colList.find(name));
-    map.insert(make_pair(name, col));
-    return *col;
-}
-
-Collection &Collection::getCollection(const std::string &name) {
-    if(map.count(name) == 0) {
-        throw "no such collection";
-    }
-    return *map[name];
-}
-
-Collection::Collection(const std::string &name, const int &firstPage) {
-    Logger::info<std::string, std::string>("load Collection: ", name);
-    index = new BTree<std::string, 128>(firstPage);
-    if(!index->exists("__INVO_ID__")) {
-        index->insert("__INVO_ID__", PageManager::Instance().allocate());
-    }
-    uuid = new BTree<std::string, 32>(index->find("__INVO_ID__"));
-}
-
-void Collection::insert(nlohmann::json &json) {
-
-    if(json["__INVO_ID__"].empty()) {
-        json["__INVO_ID__"] = generateUUID();
-    } else {
-        remove(json);
-    }
-
-    std::string id = json["__INVO_ID__"].get<std::string>();
-    int add = PageManager::Instance().saveJSONToFile(json);
-    uuid->insert(id, add);
-
-    //Logger::info<std::string, std::string>("INSERT ", json.dump());
-
-    // add index
-    indexJSON("", json, add);
-}
-
-void Collection::remove(const nlohmann::json &json) {
-    if(json["__INVO_ID__"].empty()) {
-        throw "no invo_id";
-    }
-    std::string id = json["__INVO_ID__"].get<std::string>();
-
-
-    int address = uuid->find(id);
-    uuid->remove(id);
-
-    nlohmann::json jsonInDisk = PageManager::Instance().readJSONFromFile(address);
-
-    clearIndex("", json, address);
-
-    PageManager::Instance().release(address);
-}
 
 // age=1  age=“hello”
 void Collection::indexJSON(const std::string prefix, const nlohmann::json &json, const int& address) {
@@ -88,7 +14,7 @@ void Collection::indexJSON(const std::string prefix, const nlohmann::json &json,
         if(value.is_boolean()) insertIndex(prefix + key, value.get<bool>(), address);
         if(value.is_number()) insertIndex(prefix + key, value.get<double>(), address);
         if(value.is_string()) insertIndex(prefix + key, value.get<std::string>(), address);
-        //if(value.is_object()) indexJSON(prefix + key + ".", value.get<nlohmann::json>(),address);
+        if(value.is_object()) indexJSON(prefix + key + ".", value.get<nlohmann::json>(),address);
         if(value.is_array()) {
             for(auto& element : value.get<nlohmann::json>()) {
                 if(element.is_string()) insertIndex(prefix + key, element.get<std::string>(), address);
@@ -110,7 +36,7 @@ void Collection::insertIndex(const std::string indexName, const std::string inde
         index->insert(treeName, PageManager::Instance().allocate());
     }
 
-    BTree<std::string, 128> indexTree(index->find(treeName));
+    BTree<std::string, 64> indexTree(index->find(treeName));
 
     if(!indexTree.exists(indexValue)) {
         indexTree.insert(indexValue, PageManager::Instance().allocate());
@@ -227,18 +153,4 @@ void Collection::removeIndex(const std::string indexName, bool indexValue, const
 
     List<int, 4> list(indexTree.find(indexValue));
     list.remove(address);
-}
-
-void Collection::test() {
-    index->print();
-    auto qq = new BTree<std::string, 128>(7);
-    while(true) {
-        std::string q;
-        std::cin >> q;
-        List<int, 4> list(qq->find(q));
-        //list.print();
-        for(auto& add : list.all()) {
-            std::cout << ">> " << PageManager::Instance().readJSONFromFile(add).dump() << std::endl;
-        }
-    }
 }
