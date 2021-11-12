@@ -1,0 +1,24 @@
+{
+  "name": "invodb",
+  "version": "1.0.0",
+  "description": "a nosql json document database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YuhangQ/InvoDB.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/YuhangQ/InvoDB/issues"
+  },
+  "homepage": "https://github.com/YuhangQ/InvoDB#readme",
+  "dependencies": {
+    "node-addon-api": "^4.2.0"
+  }
+}

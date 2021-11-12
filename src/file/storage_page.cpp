@@ -62,6 +62,8 @@ int StoragePage::getAddress() {
 }
 
 StoragePage::StoragePage() {
+
+    printf("aha!\n");
     memset(page, 0, sizeof(page));
 }
 

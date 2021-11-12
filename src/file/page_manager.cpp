@@ -3,10 +3,10 @@
 //
 
 #include "page_manager.h"
-#include "btree/list.h"
 
-
-int PageManager::loadDatabase(const char *filename) {
+int PageManager::loadDatabase(const char *filename) { 
+    std::ofstream file(filename, std::fstream::out);
+    file.close();
     Instance().stream.open(filename);
     Instance().stream.seekp(0, std::ios::end);
     int index = Instance().stream.tellp() / 1024;

@@ -9,12 +9,9 @@
 #include <fstream>
 #include <map>
 
+#include "../json/json.hpp"
+#include "../utils/cache.h"
 #include "storage_page.h"
-#include "json/json.hpp"
-#include "invodb/utils/cache.h"
-
-template<typename T, int T_SIZE>
-class List;
 
 class PageManager {
 public:

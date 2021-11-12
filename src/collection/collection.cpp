@@ -27,6 +27,10 @@ Collection& Collection::createCollection(const std::string &name) {
     return *col;
 }
 
+bool Collection::existsCollection(const std::string& name) {
+    return map.count(name) != 0;
+}
+
 Collection &Collection::getCollection(const std::string &name) {
     if(map.count(name) == 0) {
         throw "no such collection";
@@ -55,7 +59,7 @@ void Collection::insert(nlohmann::json &json) {
     int add = PageManager::Instance().saveJSONToFile(json);
     uuid->insert(id, add);
 
-    //Logger::info<std::string, std::string>("INSERT ", json.dump());
+    Logger::info<std::string, std::string>("INSERT ", json.dump());
 
     // add index
     indexJSON("", json, add);

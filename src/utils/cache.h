@@ -7,7 +7,7 @@
 
 #include <list>
 #include <map>
-#include "invodb/file/storage_page.h"
+#include "../file/storage_page.h"
 
 template<typename KT, typename VT>
 class LRUCache {

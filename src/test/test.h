@@ -1,11 +1,9 @@
-//
-// Created by YuhangQ on 2021/9/24.
-//
-
-#include "main.h"
-
-
-void testAndBenchmark(int n);
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include "../collection/collection.h"
+#include "../btree/list.h"
 
 Collection *col;
 
@@ -53,84 +51,6 @@ void terminal() {
     }
 }
 
-int main() {
-    int t = time(0);
-    srand(1635418590);
-    //srand(t);
-    printf("seed: %d\n", t);
-
-    system("rm -rf test.invodb && touch test.invodb");
-
-    PageManager::loadDatabase("test.invodb");
-
-    Collection::loadCollections();
-
-    PageManager& manager = PageManager::Instance();
-
-    try {
-       col = &Collection::getCollection("hello");
-    } catch(const char *error) {
-        Collection::createCollection("hello");
-        col = &Collection::getCollection("hello");
-    }
-
-//    nlohmann::json j = nlohmann::json::parse(R"(
-//{
-//        "title" : "MongoDB 教程",
-//        "description" : "MongoDB 是一个 Nosql 数据库",
-//        "by" : "菜鸟教程",
-//        "url" : "http://www.runoob.com",
-//        "tags" : [
-//                "mongodb",
-//                "database",
-//                "NoSQL"
-//        ],
-//        "likes" : 100
-//}
-//    )");
-//
-//    col->insert(j);
-//
-//    col->query(nlohmann::json::parse(R"(
-//{
-//	"likes": {"$gt":50},
-//	"$or": [
-//		{"by": "菜鸟教程"},
-//		{"title": "MongoDB 教程"}
-//	]
-//}
-//    )"));
-
-    terminal();
-
-
-//    freopen("qq.txt", "r", stdin);
-//    const int n = 1000000;
-//    char qq[100], phone[100];
-//
-//    clock_t start = clock();
-//    for(int i=0; i<n; i++) {
-//        scanf("%s%s", qq, phone);
-//        nlohmann::json json;
-//        json["qq"] = qq;
-//        json["phone"] = phone;
-//        col->insert(json);
-//
-//        if(i % (n/1000) == 0) {
-//            printf("[%d/%d] time=%fs!\n", i, n, (double)(clock() - start) / CLOCKS_PER_SEC);
-//            start = clock();
-//        }
-//    }
-
-    //col->test();
-
-
-
-
-    //testAndBenchmark(20000);
-
-    return 0;
-}
 
 void testAndBenchmark(int n) {
 

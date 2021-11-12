@@ -5,8 +5,8 @@
 #ifndef INVODB_BTREE_H
 #define INVODB_BTREE_H
 
-#include "btree/node.h"
-#include "utils/uuid.h"
+#include "node.h"
+#include "../utils/uuid.h"
 
 #define M_SIZE 1000 / (K_SIZE + 4)
 

@@ -5,16 +5,16 @@
 #ifndef INVODB_COLLECTION_H
 #define INVODB_COLLECTION_H
 
-#include "file/page_manager.h"
-#include "utils/logger.h"
-#include "btree/btree.h"
-#include "json/json.hpp"
+#include "../file/page_manager.h"
+#include "../utils/logger.h"
+#include "../btree/btree.h"
+#include "../json/json.hpp"
 #include <map>
 #include <set>
 #include <algorithm>
 #include <cstring>
-#include "utils/uuid.h"
-#include "btree/list.h"
+#include "../utils/uuid.h"
+#include "../btree/list.h"
 
 class Collection {
 public:
@@ -23,6 +23,7 @@ public:
     std::vector<nlohmann::json> query(const nlohmann::json &json);
     static void loadCollections();
     static Collection& getCollection(const std::string& name);
+    static bool existsCollection(const std::string& name);
     static Collection& createCollection(const std::string& name);
 
     void test();

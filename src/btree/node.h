@@ -13,8 +13,8 @@
 #include <algorithm>
 #include <map>
 #include <type_traits>
-#include "file/page_manager.h"
-#include "invodb/utils/cache.h"
+#include "../file/page_manager.h"
+#include "../utils/cache.h"
 
 template<int M_SIZE, typename KT, int K_SIZE>
 class BTreeNode {
