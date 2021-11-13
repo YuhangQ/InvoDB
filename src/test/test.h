@@ -54,7 +54,7 @@ void terminal() {
 
 void testAndBenchmark(int n) {
 
-    auto btree = new BTree<std::string, 128>(PageManager::Instance().allocate());
+    auto btree = new BTree<std::string, 128>(PageManager::allocate());
 
     printf("nodeSize: %d\n", btree->getNodeSize());
 

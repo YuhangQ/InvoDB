@@ -325,8 +325,8 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
 
     cur->linkSet[cur->insert(key)] = address;
 
-    auto lLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
-    auto rLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+    auto lLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
+    auto rLeaf = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
 
     int mid = (cur->m / 2);
     for(int i=0; i<mid; i++) lLeaf->linkSet[lLeaf->insert(cur->keySet[i])] = cur->linkSet[i];
@@ -351,7 +351,7 @@ void BTree<KT, K_SIZE>::split(const KT &key, int address, int parentAdd, int cur
 
 
     if(cur->address == root) {
-//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
 //        newRoot->insert(rLeaf->keySet[0]);
 //        newRoot->linkSet[0] = lLeaf->address;
 //        newRoot->linkSet[1] = rLeaf->address;
@@ -432,8 +432,8 @@ void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, 
         return;
     }
 
-    auto newLChild = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
-    auto newRChild = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+    auto newLChild = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
+    auto newRChild = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
     newLChild->leaf = false;
     newRChild->leaf = false;
     newLChild->right = newRChild->address;
@@ -479,7 +479,7 @@ void BTree<KT, K_SIZE>::insertInternal(const KT &key, int curAdd, int lLeafAdd, 
 
 
     if(cur->address == root) {
-//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::Instance().allocate());
+//        auto newRoot = BTreeNode<M_SIZE, KT, K_SIZE>::getNode(PageManager::allocate());
 //        newRoot->insert(cur->keySet[mid]);
 //        newRoot->linkSet[0] = newLChild->address;
 //        newRoot->linkSet[1] = newRChild->address;

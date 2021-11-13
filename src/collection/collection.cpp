@@ -21,7 +21,7 @@ Collection& Collection::createCollection(const std::string &name) {
     if(map.count(name) != 0) {
         return *map[name];
     }
-    colList.insert(name, PageManager::Instance().allocate());
+    colList.insert(name, PageManager::allocate());
     Collection *col = new Collection(name, colList.find(name));
     map.insert(make_pair(name, col));
     return *col;
@@ -42,7 +42,7 @@ Collection::Collection(const std::string &name, const int &firstPage) {
     Logger::info<std::string, std::string>("load Collection: ", name);
     index = new BTree<std::string, 128>(firstPage);
     if(!index->exists("__INVO_ID__")) {
-        index->insert("__INVO_ID__", PageManager::Instance().allocate());
+        index->insert("__INVO_ID__", PageManager::allocate());
     }
     uuid = new BTree<std::string, 32>(index->find("__INVO_ID__"));
 }
@@ -56,10 +56,10 @@ void Collection::insert(nlohmann::json &json) {
     }
 
     std::string id = json["__INVO_ID__"].get<std::string>();
-    int add = PageManager::Instance().saveJSONToFile(json);
+    int add = PageManager::saveJSONToFile(json);
     uuid->insert(id, add);
 
-    //Logger::info<std::string, std::string>("INSERT ", json.dump());
+    Logger::info<std::string, std::string>("INSERT ", json.dump());
 
     // add index
     indexJSON("", json, add);
@@ -75,11 +75,11 @@ void Collection::remove(const nlohmann::json &json) {
     int address = uuid->find(id);
     uuid->remove(id);
 
-    nlohmann::json jsonInDisk = PageManager::Instance().readJSONFromFile(address);
+    nlohmann::json jsonInDisk = PageManager::readJSONFromFile(address);
 
     clearIndex("", json, address);
 
-    PageManager::Instance().release(address);
+    PageManager::release(address);
 }
 
 
@@ -92,7 +92,7 @@ void Collection::test() {
         List<int, 4> list(qq->find(q));
         //list.print();
         for(auto& add : list.all()) {
-            std::cout << ">> " << PageManager::Instance().readJSONFromFile(add).dump() << std::endl;
+            std::cout << ">> " << PageManager::readJSONFromFile(add).dump() << std::endl;
         }
     }
 }

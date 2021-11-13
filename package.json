@@ -1,6 +1,6 @@
 {
   "name": "invodb",
-  "version": "1.0.3",
+  "version": "1.0.15",
   "description": "a nosql json document database",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/YuhangQ/InvoDB#readme",
   "dependencies": {
-    "node-addon-api": "^4.2.0",
-    "node-gyp": "^8.4.0"
+    "node-addon-api": "^4.2.0"
   }
 }

@@ -1,3 +1,6 @@
+
+const fs = require('fs')
+
 const invodb = require('..')
 
 invodb.database('zzz.invodb')
@@ -5,18 +8,19 @@ invodb.database('zzz.invodb')
 let col = invodb.colection('blog')
 if(!col.exist()) col.create();
 
-for(let i=0; i<1; i++) {
-    col.insert({ id: "1s", title: "第一篇文章", author: "YuhangQ"})
-    col.insert({ id: "2s", title: "第二篇文章", author: "Ciel"})
-    col.insert({ id: "3s", title: "第三篇文章", author: "YuhangQ"})
-    col.insert({ id: "4s", title: "第四篇文章", author: "By"})
+for(let json of col.query({})) col.remove(json)
+
+let list = fs.readFileSync(__dirname + "/list.txt").toString().split("\n")
+for(let json of list) {
+    col.insert(JSON.parse(json))
 }
 
-let result = col.query({id: {}})
+let result = col.query({
+    id: {
+        $ne: 2
+    }
+})
 
-// for(let json of result) {
-//     col.remove(json)
-// }
-
+console.log(">>>>>>>>>>>>>>>>>>>>")
 console.log(result)
 console.log(result.length)

@@ -61,7 +61,7 @@ LRUCache<int, std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>>> BTreeNode<M_SIZE, 
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE>::BTreeNode(const int& address): address(address) {
     clear();
-    StoragePage page = PageManager::Instance().getPage(address);
+    StoragePage page = PageManager::getPage(address);
     int p = 0;
     size = page.getIntStartFrom(p); p += 4;
     parent = page.getIntStartFrom(p); p += 4;
@@ -119,7 +119,7 @@ std::shared_ptr<BTreeNode<M_SIZE, KT, K_SIZE>> BTreeNode<M_SIZE, KT, K_SIZE>::ge
 template<int M_SIZE, typename KT, int K_SIZE>
 BTreeNode<M_SIZE, KT, K_SIZE> *BTreeNode<M_SIZE, KT, K_SIZE>::release(const int &index) {
     //cache.remove(index);
-    PageManager::Instance().release(index);
+    PageManager::release(index);
     return nullptr;
 }
 

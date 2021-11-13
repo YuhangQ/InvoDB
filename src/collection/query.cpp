@@ -24,91 +24,187 @@ std::vector<nlohmann::json> Collection::query(const nlohmann::json &json) {
  * mod = 7:   value >= minValue
  */
 
-std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, const nlohmann::json &json) {
+std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohmann::json json) {
+
+    std::set<nlohmann::json> set;
+    bool init = false;
+
+    // grammer check
+    bool isNumber;
+    bool nInit = false;
+    for(auto& [key, value] : json.items()) {
+        if(key == "$or") {
+            auto arr = value.get<nlohmann::json>();
+            std::set<nlohmann::json> tmp;
+            for(auto& q : arr) {
+                tmp = setUnion(tmp, queryRange(prefix, q.get<nlohmann::json>()));
+            }
+            if(init) set = setIntersection(set, tmp);
+            else set = tmp, init = true;
+        } else if(key == "$ne") {
+            // do nothing
+        } else if(!nInit) {
+            if(value.is_string()) {
+                isNumber = false;
+            } else if(value.is_number()) {
+                isNumber = true;
+            } else {
+                throw "unvalid query json.";
+            }
+            nInit = true;
+        } else {
+            //printf("hello: %s %d %d\n", key.c_str(),isNumber && !value.is_number(), !isNumber && !value.is_string());
+            if((isNumber && !value.is_number()) || (!isNumber && !value.is_string())) {
+                throw "unvalid query json.";
+            }
+        }
+    }
+
+    if(isNumber) {
+        if(json.contains("$gt") && json.contains("$gte")) {
+                auto gt = json["$gt"].get<double>();
+                auto gte = json["$gte"].get<double>();
+                if(gte > gt) {
+                    json.erase("$gt");
+                } else {
+                    json.erase("$gte");
+                }
+            }
+
+        if(json.contains("$lt") && json.contains("$lte")) {
+            auto lt = json["$lt"].get<double>();
+            auto lte = json["$lte"].get<double>();
+            if(lt <= lte) {
+                json.erase("$lte");
+            } else {
+                json.erase("$lt");
+            }
+        }
+
+        std::set<nlohmann::json> tmp;
+
+        if(json.contains("$gt")) {
+            if(json.contains("$lt")) {
+                tmp = queryNumber(prefix, json["$gt"].get<double>(), json["$lt"].get<double>(), 3);
+            } else if(json.contains("$lte")) {
+                tmp = queryNumber(prefix, json["$gt"].get<double>(), json["$lte"].get<double>(), 1);
+            } else {
+
+                tmp = queryNumber(prefix, json["$gt"].get<double>(), 0, 6);
+
+            }
+        } else if(json.contains("$gte")) {
+            if(json.contains("$lt")) {
+                tmp = queryNumber(prefix, json["$gte"].get<double>(), json["$lt"].get<double>(), 2);
+            } else if(json.contains("$lte")) {
+                tmp = queryNumber(prefix, json["$gte"].get<double>(), json["$lte"].get<double>(), 0);
+            } else {
+                tmp = queryNumber(prefix, json["$gte"].get<double>(), 0, 7);
+            }
+        } else if(json.contains("$lt")) {
+            tmp = queryNumber(prefix, 0, json["$lt"].get<double>(), 4);
+        } else if(json.contains("$lte")) {
+            tmp = queryNumber(prefix, 0, json["$lte"].get<double>(), 5);
+        }
+
+        if(init) set = setIntersection(set, tmp);
+        else set = tmp, init = true;
+
+    } else {
+        if(json.contains("$gt") && json.contains("$gte")) {
+            auto gt = json["$gt"].get<std::string>();
+            auto gte = json["$gte"].get<std::string>();
+            if(gte > gt) {
+                json.erase("$gt");
+            } else {
+                json.erase("$gte");
+            }
+        }
+
+        if(json.contains("$lt") && json.contains("$lte")) {
+            auto lt = json["$lt"].get<std::string>();
+            auto lte = json["$lte"].get<std::string>();
+            if(lt <= lte) {
+                json.erase("$lte");
+            } else {
+                json.erase("$lt");
+            }
+        }
+
+        std::set<nlohmann::json> tmp;
+
+        if(json.contains("$gt")) {
+            if(json.contains("$lt")) {
+                tmp = queryString(prefix, json["$gt"].get<std::string>(), json["$lt"].get<std::string>(), 3);
+            } else if(json.contains("$lte")) {
+                tmp = queryString(prefix, json["$gt"].get<std::string>(), json["$lte"].get<std::string>(), 1);
+            } else {
+                tmp = queryString(prefix, json["$gt"].get<std::string>(), "", 6);
+            }
+        } else if(json.contains("$gte")) {
+            if(json.contains("$lt")) {
+                tmp = queryString(prefix, json["$gte"].get<std::string>(), json["$lt"].get<std::string>(), 2);
+            } else if(json.contains("$lte")) {
+                tmp = queryString(prefix, json["$gte"].get<std::string>(), json["$lte"].get<std::string>(), 0);
+            } else {
+                tmp = queryString(prefix, json["$gte"].get<std::string>(), "", 7);
+            }
+        } else if(json.contains("$lt")) {
+            tmp = queryString(prefix, "", json["$lt"].get<std::string>(), 4);
+        } else if(json.contains("$lte")) {
+            tmp = queryString(prefix, "", json["$lte"].get<std::string>(), 5);
+        }
+
+        if(init) set = setIntersection(set, tmp);
+        else set = tmp, init = true;
+    }
+
+    if(!init) set = queryAllByField(prefix);
 
     printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
 
-    std::set<nlohmann::json> set;
+    printf("result: \n");
+    for(auto it=set.begin(); it!=set.end(); it++) {
+        printf(" - %s\n", it->dump().c_str());
+    }
 
-    for(auto& [key, value] : json.items()) {
-        if(value.is_number()) {
-            if(json.contains("$ne")) {
-                if(!index->exists(prefix+"$number")) {
-                    return set;
-                }
-                BTree<double, 8> tree(index->find(prefix+"$number"));
-                for(auto& key: tree.keySet()) {
-                    if(key != json["$ne"].get<double>()) continue;
-                    List<int, 4> list(tree.find(key));
-                    for(auto& add : list.all()) {
-                        set.insert(PageManager::Instance().readJSONFromFile(add));
-                    }
+    if(json.contains("$ne")) {
+        if(json["$ne"].is_null()) {
+            // do nothing
+        } else if(json["$ne"].is_string()) {
+            List<int, 4> tree(index->find(prefix + "$null"));
+            for(auto& add : tree.all()) {
+                set.insert(PageManager::readJSONFromFile(add));
+            }
+            auto value = json["$ne"].get<std::string>();
+            BTree<std::string, 64> indexTree(index->find(prefix + "$string"));
+            if(indexTree.find(value) != -1) {
+                List<int, 4> indexList(indexTree.find(value));
+                for(auto& add : indexList.all()) {
+                    set.erase(PageManager::readJSONFromFile(add));
                 }
             }
-            else if(json.contains("$gt")) {
-                if(json.contains("$lt")) {
-                    set = queryNumber(prefix, json["$gt"].get<double>(), json["$lt"].get<double>(), 3);
-                } else if(json.contains("$lte")) {
-                    set = queryNumber(prefix, json["$gt"].get<double>(), json["$lte"].get<double>(), 1);
-                } else {
-
-                    set = queryNumber(prefix, json["$gt"].get<double>(), 0, 6);
-
-                }
-            } else if(json.contains("$gte")) {
-                if(json.contains("$lt")) {
-                    set = queryNumber(prefix, json["$gte"].get<double>(), json["$lt"].get<double>(), 2);
-                } else if(json.contains("$lte")) {
-                    set = queryNumber(prefix, json["$gte"].get<double>(), json["$lte"].get<double>(), 0);
-                } else {
-                    set = queryNumber(prefix, json["$gte"].get<double>(), 0, 7);
-                }
-            } else if(json.contains("$lt")) {
-                set = queryNumber(prefix, 0, json["$lt"].get<double>(), 4);
-            } else if(json.contains("$lte")) {
-                set = queryNumber(prefix, 0, json["$lte"].get<double>(), 5);
+            
+        } else if(json["$ne"].is_number()) {
+            List<int, 4> tree(index->find(prefix + "$null"));
+            for(auto& add : tree.all()) {
+                set.insert(PageManager::readJSONFromFile(add));
             }
-            return set;
-        }
-        else if(value.is_string()) {
 
-            if(json.contains("$ne")) {
-                if(!index->exists(prefix+"$string")) {
-                    return set;
-                }
-                BTree<std::string, 64> tree(index->find(prefix+"$string"));
-                for(auto& key: tree.keySet()) {
-                    if(key != json["$ne"].get<std::string>()) continue;
-                    List<int, 4> list(tree.find(key));
-                    for(auto& add : list.all()) {
-                        set.insert(PageManager::Instance().readJSONFromFile(add));
-                    }
+            auto value = json["$ne"].get<double>();
+            BTree<double, 8> indexTree(index->find(prefix + "$number"));
+            if(indexTree.find(value) != -1) {
+                List<int, 4> indexList(indexTree.find(value));
+                for(auto& add : indexList.all()) {
+                    set.erase(PageManager::readJSONFromFile(add));
                 }
             }
-            else if(json.contains("$gt")) {
-                if(json.contains("$lt")) {
-                    set = queryString(prefix, json["$gt"].get<std::string>(), json["$lt"].get<std::string>(), 3);
-                } else if(json.contains("$lte")) {
-                    set = queryString(prefix, json["$gt"].get<std::string>(), json["$lte"].get<std::string>(), 1);
-                } else {
-                    set = queryString(prefix, json["$gt"].get<std::string>(), "", 6);
-                }
-            } else if(json.contains("$gte")) {
-                if(json.contains("$lt")) {
-                    set = queryString(prefix, json["$gte"].get<std::string>(), json["$lt"].get<std::string>(), 2);
-                } else if(json.contains("$lte")) {
-                    set = queryString(prefix, json["$gte"].get<std::string>(), json["$lte"].get<std::string>(), 0);
-                } else {
-                    set = queryString(prefix, json["$gte"].get<std::string>(), "", 7);
-                }
-            } else if(json.contains("$lt")) {
-                set = queryString(prefix, "", json["$lt"].get<std::string>(), 4);
-            } else if(json.contains("$lte")) {
-                set = queryString(prefix, "", json["$lte"].get<std::string>(), 5);
-            }
-            return set;
+        } else {
+            throw "unvalid query json.";
         }
     }
+
+    
 
     return set;
 }
@@ -162,6 +258,14 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
                     }
                     else
                         tmp = setIntersection(queryNumber(tPrefix, element.get<double>(), element.get<double>()), tmp);
+                } else if(element.is_null()) {
+                    if (flag)
+                    {
+                        tmp = queryNull(tPrefix);
+                        flag = false;
+                    }
+                    else
+                        tmp = queryNull(tPrefix);
                 }
             }
         } else if(json[key].is_boolean()) {
@@ -170,6 +274,8 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
             tmp = queryString(tPrefix, json[key].get<std::string>(), json[key].get<std::string>());
         } else if(json[key].is_number()) {
             tmp = queryNumber(tPrefix, json[key].get<double>(), json[key].get<double>());
+        } else if(json[key].is_null()) {
+            tmp = queryNull(tPrefix);
         }
         if (flag) continue;
         if(init) res = tmp, init = false;
@@ -184,9 +290,6 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
     }
 
     if (init) return queryAllByField(prefix);
-    
-
-    
 
     return res;
 }
@@ -199,7 +302,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
     // return all
     if(fieldName == "") {
         for(auto& [key, value] : uuid->all()) {
-            res.insert(PageManager::Instance().readJSONFromFile(value));
+            res.insert(PageManager::readJSONFromFile(value));
         }
     } else {
         auto tfieldName = fieldName.substr(0, fieldName.size()-1);
@@ -211,7 +314,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
                 for(auto& add : list.all()) {
-                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                    res.insert(PageManager::readJSONFromFile(add));
                 }
             }
         }
@@ -221,7 +324,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
                 for(auto& add : list.all()) {
-                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                    res.insert(PageManager::readJSONFromFile(add));
                 }
             }
         }
@@ -231,10 +334,18 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
                 for(auto& add : list.all()) {
-                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                    res.insert(PageManager::readJSONFromFile(add));
                 }
             }
         }
+
+        if((treeID = index->find(tfieldName + "$null")) != -1) {
+            List<int, 4> list(treeID);
+            for(auto& add : list.all()) {
+                res.insert(PageManager::readJSONFromFile(add));
+            }
+        }
+        
     }
     return res;
 }
@@ -323,7 +434,7 @@ Collection::queryString(const std::string &prefix, const std::string &minValue, 
             }
             List<int, 4> list(node->linkSet[i]);
             for(auto& add : list.all()) {
-                res.insert(PageManager::Instance().readJSONFromFile(add));
+                res.insert(PageManager::readJSONFromFile(add));
             }
         }
         if(!flag) break;
@@ -408,7 +519,7 @@ Collection::queryNumber(const std::string &prefix, const double &minValue, const
 
             List<int, 4> list(node->linkSet[i]);
             for(auto& add : list.all()) {
-                res.insert(PageManager::Instance().readJSONFromFile(add));
+                res.insert(PageManager::readJSONFromFile(add));
             }
         }
         if(!flag) break;
@@ -438,12 +549,26 @@ Collection::queryBool(const std::string &prefix, const bool &value) {
             }
             List<int, 4> list(node->linkSet[i]);
             for(auto& add : list.all()) {
-                res.insert(PageManager::Instance().readJSONFromFile(add));
+                res.insert(PageManager::readJSONFromFile(add));
             }
         }
         if(!flag) break;
         if(node->right == 0) break;
         node = tree.getNode(node->right);
+    }
+    return res;
+}
+
+
+std::set<nlohmann::json> Collection::queryNull(const std::string &prefix) {
+    std::set<nlohmann::json> res;
+    auto treeName = prefix + "$null";
+    if(!index->exists(treeName)) {
+        return res;
+    }
+    List<int, 4> tree(index->find(treeName));
+    for(auto& add : tree.all()) {
+        res.insert(PageManager::readJSONFromFile(add));
     }
     return res;
 }

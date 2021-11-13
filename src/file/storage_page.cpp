@@ -54,7 +54,7 @@ void StoragePage::setStringStartFrom(const int &index, const std::string &str) {
 }
 
 void StoragePage::save() {
-    PageManager::Instance().setPage(address, *this);
+    PageManager::setPage(address, *this);
 }
 
 int StoragePage::getAddress() {

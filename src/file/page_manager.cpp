@@ -4,6 +4,9 @@
 
 #include "page_manager.h"
 
+std::map<int, StoragePage> PageManager::map;
+std::fstream PageManager::stream;
+
 int PageManager::loadDatabase(const char *filename) { 
     Instance().stream.open(filename);
     Instance().stream.seekp(0, std::ios::end);

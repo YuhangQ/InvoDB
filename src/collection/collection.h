@@ -35,6 +35,8 @@ private:
     void insertIndex(const std::string indexName, const std::string indexValue, const int& address);
     void insertIndex(const std::string indexName, double indexValue, const int& address);
     void insertIndex(const std::string indexName, bool indexValue, const int& address);
+    void insertNullIndex(const std::string indexName, const int& address);
+    void removeNullIndex(const std::string indexName, const int& address);
     void clearIndex(const std::string prefix, const nlohmann::json &json, const int& address);
     void removeIndex(const std::string indexName, const std::string indexValue, const int& address);
     void removeIndex(const std::string indexName, double indexValue, const int& address);
@@ -48,7 +50,8 @@ private:
     std::set<nlohmann::json> queryString(const std::string &prefix, const std::string &minValue, const std::string &maxValue, const int &mod = 0);
     std::set<nlohmann::json> queryNumber(const std::string &prefix, const double &minValue, const double &maxValue, const int &mod = 0);
     std::set<nlohmann::json> queryBool(const std::string &prefix, const bool &value);
-    std::set<nlohmann::json> queryRange(const std::string &prefix, const nlohmann::json &json);
+    std::set<nlohmann::json> queryNull(const std::string &prefix);
+    std::set<nlohmann::json> queryRange(const std::string &prefix, nlohmann::json json);
     std::set<nlohmann::json> queryAllByField(const std::string &fieldName);
 
     static std::map<std::string, Collection*> map;

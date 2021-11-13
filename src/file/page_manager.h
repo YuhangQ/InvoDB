@@ -16,21 +16,22 @@
 class PageManager {
 public:
     static PageManager& Instance() {
-        static PageManager instance;
-        return instance;
+        static PageManager* instance;
+        if(instance == nullptr) instance = new PageManager();
+        return *instance;
     }
     static int loadDatabase(const char *filename);
 
-    StoragePage getPage(const int &index);
-    void setPage(const int &index, const StoragePage &page);
+    static StoragePage getPage(const int &index);
+    static void setPage(const int &index, const StoragePage &page);
     template<typename T>
     static std::shared_ptr<T> getNode(const int &index);
-    int allocate();
-    void release(const int &index, const bool &next = true);
-    int saveJSONToFile(const nlohmann::json& json);
-    nlohmann::json readJSONFromFile(const int &index);
-    std::map<int, StoragePage> map;
-    std::fstream stream;
+    static int allocate();
+    static void release(const int &index, const bool &next = true);
+    static int saveJSONToFile(const nlohmann::json& json);
+    static nlohmann::json readJSONFromFile(const int &index);
+    static std::map<int, StoragePage> map;
+    static std::fstream stream;
     // 私有化实现单例
     PageManager() {}
     ~PageManager() {}
