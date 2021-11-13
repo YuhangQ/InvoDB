@@ -29,12 +29,10 @@ public:
     void release(const int &index, const bool &next = true);
     int saveJSONToFile(const nlohmann::json& json);
     nlohmann::json readJSONFromFile(const int &index);
-private:
     std::map<int, StoragePage> map;
     std::fstream stream;
-    LRUCache<int, std::shared_ptr<StoragePage>> cache;
     // 私有化实现单例
-    PageManager():cache(LRUCache<int, std::shared_ptr<StoragePage>>(100000)) {}
+    PageManager() {}
     ~PageManager() {}
     PageManager(const PageManager&);
     PageManager& operator=(const PageManager&);
