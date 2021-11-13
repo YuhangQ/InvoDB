@@ -26,13 +26,12 @@ std::vector<nlohmann::json> Collection::query(const nlohmann::json &json) {
 
 std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, const nlohmann::json &json) {
 
-    //printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
+    printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
 
     std::set<nlohmann::json> set;
 
     for(auto& [key, value] : json.items()) {
         if(value.is_number()) {
-
             if(json.contains("$ne")) {
                 if(!index->exists(prefix+"$number")) {
                     return set;
@@ -113,7 +112,6 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, const
 
     return set;
 }
-
 std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const nlohmann::json &json) {
 
     for(auto& [key, value] : json.items()) {
@@ -123,7 +121,7 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
     }
 
     std::set<nlohmann::json> res;
-    bool init = true;
+    bool init = true, flag = false;
 
     for(auto& [key, value] : json.items()) {
 
@@ -138,7 +136,34 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
         } else if(json[key].is_object()) {
             tmp = innerQuery(prefix + key + ".", json[key].get<nlohmann::json>());
         } else if(json[key].is_array()) {
-
+            flag = true;
+            for(auto element : json[key].get<nlohmann::json>()) {
+                if(element.is_boolean()) {
+                    if (flag)
+                    {
+                        tmp = queryBool(tPrefix, element.get<bool>());
+                        flag = false;
+                    }
+                    else
+                        tmp = setIntersection(queryBool(tPrefix, element.get<bool>()), tmp);
+                } else if(element.is_string()) {
+                    if (flag)
+                    {
+                        tmp = queryString(tPrefix, element.get<std::string>(), element.get<std::string>());
+                        flag = false;
+                    }
+                    else
+                        tmp = setIntersection(queryString(tPrefix, element.get<std::string>(), element.get<std::string>()), tmp);
+                } else if(element.is_number()) {
+                    if (flag)
+                    {
+                        tmp = queryNumber(tPrefix, element.get<double>(), element.get<double>());
+                        flag = false;
+                    }
+                    else
+                        tmp = setIntersection(queryNumber(tPrefix, element.get<double>(), element.get<double>()), tmp);
+                }
+            }
         } else if(json[key].is_boolean()) {
             tmp = queryBool(tPrefix, json[key].get<bool>());
         } else if(json[key].is_string()) {
@@ -146,18 +171,71 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
         } else if(json[key].is_number()) {
             tmp = queryNumber(tPrefix, json[key].get<double>(), json[key].get<double>());
         }
+        if (flag) continue;
         if(init) res = tmp, init = false;
         else res = setIntersection(res, tmp);
     }
 
     auto str = json.dump();
+    printf("query: %s prefix: %s\n", str.c_str(), prefix.c_str());
+    printf("result: \n");
+    for(auto it=res.begin(); it!=res.end(); it++) {
+        printf(" - %s\n", it->dump().c_str());
+    }
 
-    // printf("query: %s prefix: %s\n", str.c_str(), prefix.c_str());
-    // printf("result: \n");
-    // for(auto it=res.begin(); it!=res.end(); it++) {
-    //     printf(" - %s\n", it->dump().c_str());
-    // }
+    if (init) return queryAllByField(prefix);
+    
 
+    
+
+    return res;
+}
+
+
+
+std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldName) {
+    std::set<nlohmann::json> res;
+
+    // return all
+    if(fieldName == "") {
+        for(auto& [key, value] : uuid->all()) {
+            res.insert(PageManager::Instance().readJSONFromFile(value));
+        }
+    } else {
+        auto tfieldName = fieldName.substr(0, fieldName.size()-1);
+
+        int treeID;
+
+        if((treeID = index->find(tfieldName + "$string")) != -1) {
+            BTree<std::string, 64> tree(treeID);
+            for(auto &[key, value] : tree.all()) {
+                List<int, 4> list(value);
+                for(auto& add : list.all()) {
+                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                }
+            }
+        }
+
+        if((treeID = index->find(tfieldName + "$number")) != -1) {
+            BTree<double, 8> tree(treeID);
+            for(auto &[key, value] : tree.all()) {
+                List<int, 4> list(value);
+                for(auto& add : list.all()) {
+                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                }
+            }
+        }
+
+        if((treeID = index->find(tfieldName + "$boolean")) != -1) {
+            BTree<bool, 1> tree(treeID);
+            for(auto &[key, value] : tree.all()) {
+                List<int, 4> list(value);
+                for(auto& add : list.all()) {
+                    res.insert(PageManager::Instance().readJSONFromFile(add));
+                }
+            }
+        }
+    }
     return res;
 }
 
@@ -267,7 +345,7 @@ std::set<nlohmann::json>
 Collection::queryNumber(const std::string &prefix, const double &minValue, const double &maxValue, const int &mod) {
     std::set<nlohmann::json> res;
     auto treeName = prefix + "$number";
-    //printf(">>>> %s %f %f\n", prefix.c_str(), minValue, maxValue);
+    printf(">>>> %s %f %f %d\n", prefix.c_str(), minValue, maxValue, mod);
 
     if(!index->exists(treeName)) {
         return res;

@@ -4,7 +4,7 @@
   "description": "a nosql json document database",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "clear && node-gyp build && node demo/test.js",
     "install": "node-gyp rebuild"
   },
   "repository": {

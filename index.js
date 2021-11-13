@@ -20,7 +20,11 @@ function colection(collectionName) {
     function query(object) {
         if(!core.exists(collectionName)) throw `Collection ${collectionName} doesn't exists!`;
         let json = JSON.stringify(object);
-        return core.query(collectionName, json);
+        let res = [];
+        for(let str of core.query(collectionName, json)) {
+            res.push(JSON.parse(str));
+        }
+        return res;
     }
     return {
         exist: exist,

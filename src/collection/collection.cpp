@@ -59,7 +59,7 @@ void Collection::insert(nlohmann::json &json) {
     int add = PageManager::Instance().saveJSONToFile(json);
     uuid->insert(id, add);
 
-    Logger::info<std::string, std::string>("INSERT ", json.dump());
+    //Logger::info<std::string, std::string>("INSERT ", json.dump());
 
     // add index
     indexJSON("", json, add);

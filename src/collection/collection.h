@@ -29,6 +29,8 @@ public:
     void test();
 
 private:
+
+    
     void indexJSON(const std::string prefix, const nlohmann::json &json, const int& address);
     void insertIndex(const std::string indexName, const std::string indexValue, const int& address);
     void insertIndex(const std::string indexName, double indexValue, const int& address);
@@ -41,11 +43,13 @@ private:
     std::set<nlohmann::json> setIntersection(const std::set<nlohmann::json> &a, const std::set<nlohmann::json> &b);
     std::set<nlohmann::json> setUnion(const std::set<nlohmann::json> &a, const std::set<nlohmann::json> &b);
 
+
     std::set<nlohmann::json> innerQuery(const std::string &prefix, const nlohmann::json &json);
     std::set<nlohmann::json> queryString(const std::string &prefix, const std::string &minValue, const std::string &maxValue, const int &mod = 0);
     std::set<nlohmann::json> queryNumber(const std::string &prefix, const double &minValue, const double &maxValue, const int &mod = 0);
     std::set<nlohmann::json> queryBool(const std::string &prefix, const bool &value);
     std::set<nlohmann::json> queryRange(const std::string &prefix, const nlohmann::json &json);
+    std::set<nlohmann::json> queryAllByField(const std::string &fieldName);
 
     static std::map<std::string, Collection*> map;
     static BTree<std::string, 32> colList;

@@ -5,10 +5,14 @@
 #include "page_manager.h"
 
 int PageManager::loadDatabase(const char *filename) { 
-    std::ofstream file(filename, std::fstream::out);
-    file.close();
     Instance().stream.open(filename);
     Instance().stream.seekp(0, std::ios::end);
+    if(!Instance().stream.is_open()) {
+        std::ofstream file(filename, std::fstream::out);
+        file.close();
+        Instance().stream.open(filename);
+        Instance().stream.seekp(0, std::ios::end);
+    }
     int index = Instance().stream.tellp() / 1024;
     if(index == 0) {
         StoragePage page(0);
