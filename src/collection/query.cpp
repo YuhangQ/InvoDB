@@ -60,7 +60,7 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohm
         }
     }
 
-    if(isNumber) {
+    if(nInit && isNumber) {
         if(json.contains("$gt") && json.contains("$gte")) {
                 auto gt = json["$gt"].get<double>();
                 auto gte = json["$gte"].get<double>();
@@ -110,7 +110,8 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohm
         if(init) set = setIntersection(set, tmp);
         else set = tmp, init = true;
 
-    } else {
+    } 
+    if(nInit && !isNumber){
         if(json.contains("$gt") && json.contains("$gte")) {
             auto gt = json["$gt"].get<std::string>();
             auto gte = json["$gte"].get<std::string>();
@@ -159,9 +160,9 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohm
         else set = tmp, init = true;
     }
 
-    if(!init) set = queryAllByField(prefix);
+    printf(">> %d queryRange  prefix: %s  query: %s\n", init, prefix.c_str(), json.dump().c_str());
 
-    printf(">> queryRange  prefix: %s  query: %s\n", prefix.c_str(), json.dump().c_str());
+    if(!init) set = queryAllByField(prefix);
 
     printf("result: \n");
     for(auto it=set.begin(); it!=set.end(); it++) {
@@ -170,7 +171,10 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohm
 
     if(json.contains("$ne")) {
         if(json["$ne"].is_null()) {
-            // do nothing
+            List<int, 4> tree(index->find(prefix + "$null"));
+            for(auto& add : tree.all()) {
+                set.erase(PageManager::readJSONFromFile(add));
+            }
         } else if(json["$ne"].is_string()) {
             List<int, 4> tree(index->find(prefix + "$null"));
             for(auto& add : tree.all()) {
@@ -289,7 +293,7 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
         printf(" - %s\n", it->dump().c_str());
     }
 
-    if (init) return queryAllByField(prefix);
+    if (init) return queryAllByField(prefix == "" ? prefix : prefix.substr(0, prefix.size()-1));
 
     return res;
 }
@@ -305,11 +309,10 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             res.insert(PageManager::readJSONFromFile(value));
         }
     } else {
-        auto tfieldName = fieldName.substr(0, fieldName.size()-1);
 
         int treeID;
 
-        if((treeID = index->find(tfieldName + "$string")) != -1) {
+        if((treeID = index->find(fieldName + "$string")) != -1) {
             BTree<std::string, 64> tree(treeID);
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
@@ -319,7 +322,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             }
         }
 
-        if((treeID = index->find(tfieldName + "$number")) != -1) {
+        if((treeID = index->find(fieldName + "$number")) != -1) {
             BTree<double, 8> tree(treeID);
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
@@ -329,7 +332,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             }
         }
 
-        if((treeID = index->find(tfieldName + "$boolean")) != -1) {
+        if((treeID = index->find(fieldName + "$boolean")) != -1) {
             BTree<bool, 1> tree(treeID);
             for(auto &[key, value] : tree.all()) {
                 List<int, 4> list(value);
@@ -339,7 +342,7 @@ std::set<nlohmann::json>  Collection::queryAllByField(const std::string &fieldNa
             }
         }
 
-        if((treeID = index->find(tfieldName + "$null")) != -1) {
+        if((treeID = index->find(fieldName + "$null")) != -1) {
             List<int, 4> list(treeID);
             for(auto& add : list.all()) {
                 res.insert(PageManager::readJSONFromFile(add));
@@ -558,7 +561,6 @@ Collection::queryBool(const std::string &prefix, const bool &value) {
     }
     return res;
 }
-
 
 std::set<nlohmann::json> Collection::queryNull(const std::string &prefix) {
     std::set<nlohmann::json> res;

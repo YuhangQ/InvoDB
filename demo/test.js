@@ -17,7 +17,12 @@ for(let json of list) {
 
 let result = col.query({
     id: {
-        $ne: 2
+        $gte: 1,
+        $lte: 8,
+        $or: [
+            { $ne: 2 },
+            { $ne: 3 }
+        ]
     }
 })
 
