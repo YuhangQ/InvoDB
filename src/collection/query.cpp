@@ -235,9 +235,20 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
             }
         }
         else if(key == "$or") {
-            nlohmann::json line = json[key].get<nlohmann::json>();
-            for(auto& obj : line) {
-                tmp = setUnion(tmp, innerQuery(prefix, obj.get<nlohmann::json>()));
+
+            std::string tPrefix = (prefix == "") ? prefix : prefix.substr(0, prefix.size()-1);
+            for(auto element : json[key].get<nlohmann::json>()) {
+                if(element.is_boolean()) {
+                    tmp = setUnion(queryBool(tPrefix, element.get<bool>()), tmp);
+                } else if(element.is_string()) {
+                    tmp = setUnion(queryString(tPrefix, element.get<std::string>(), element.get<std::string>()), tmp);
+                } else if(element.is_number()) {
+                    tmp = setUnion(queryNumber(tPrefix, element.get<double>(), element.get<double>()), tmp);
+                } else if(element.is_null()) {
+                    tmp = setUnion(queryNull(tPrefix), tmp);
+                } else if(element.is_object()) {
+                    tmp = setUnion(innerQuery(tPrefix, element.get<nlohmann::json>()), tmp);
+                }
             }
         } else if(json[key].is_object()) {
             tmp = innerQuery(prefix + key + ".", json[key].get<nlohmann::json>());
@@ -275,7 +286,15 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
                         flag = false;
                     }
                     else
-                        tmp = queryNull(tPrefix);
+                        tmp = setIntersection(queryNull(tPrefix), tmp);
+                } else if(element.is_object()) {
+                    if (flag)
+                    {
+                        tmp = innerQuery(tPrefix, element.get<nlohmann::json>());
+                        flag = false;
+                    }
+                    else
+                        tmp = setIntersection(innerQuery(tPrefix, element.get<nlohmann::json>()), tmp);
                 }
             }
         } else if(json[key].is_boolean()) {
@@ -385,7 +404,7 @@ std::set<nlohmann::json>
 Collection::queryString(const std::string &prefix, const std::string &minValue, const std::string &maxValue, const int &mod) {
     std::set<nlohmann::json> res;
     auto treeName = prefix + "$string";
-    //printf(">>>> %s %s %s\n", prefix.c_str(), minValue.c_str(), maxValue.c_str());
+    //printf("query string >>>> %s %s %s\n", prefix.c_str(), minValue.c_str(), maxValue.c_str());
     if(!index->exists(treeName)) {
         return res;
     }

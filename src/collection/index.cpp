@@ -21,6 +21,7 @@ void Collection::indexJSON(const std::string prefix, const nlohmann::json &json,
                 if(element.is_string()) insertIndex(prefix + key, element.get<std::string>(), address);
                 if(element.is_number()) insertIndex(prefix + key, element.get<double>(), address);
                 if(element.is_boolean()) insertIndex(prefix + key, element.get<bool>(), address);
+                if(element.is_object()) indexJSON(prefix + key, element.get<nlohmann::json>(), address);
             }
         }
     }
@@ -98,6 +99,7 @@ void Collection::clearIndex(const std::string prefix, const nlohmann::json &json
                 if(element.is_string()) removeIndex(prefix + key, element.get<std::string>(), address);
                 if(element.is_number()) removeIndex(prefix + key, element.get<double>(), address);
                 if(element.is_boolean()) removeIndex(prefix + key, element.get<bool>(), address);
+                if(element.is_object()) clearIndex(prefix + key, element.get<nlohmann::json>(), address);
             }
         }
     }

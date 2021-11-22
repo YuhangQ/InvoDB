@@ -4,7 +4,7 @@ function database(filename) {
     core.database(filename);
 }
 
-function colection(collectionName) {
+function collection(collectionName) {
     function exist() { return core.exists(collectionName); }
     function create() { core.create(collectionName); }
     function insert(object) {
@@ -37,6 +37,6 @@ function colection(collectionName) {
 
 module.exports = {
     database: database,
-    colection: colection
+    collection: collection
 };
 
