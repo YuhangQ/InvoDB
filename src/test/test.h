@@ -8,6 +8,14 @@
 Collection *col;
 
 void terminal() {
+
+    PageManager::loadDatabase("test.invodb");
+    Collection::loadCollections();
+
+    if (!Collection::existsCollection("test"))
+        Collection::createCollection("test");
+    col = &Collection::getCollection("test");
+
     printf("--------INVODB TERMINAL--------\n");
     printf("insert\t<JSON>\tinsert a one line json to database.\n");
     printf("query\t<JSON>\tquery all jsons satisfying the query json.\n");

@@ -228,7 +228,13 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
         std::set<nlohmann::json> tmp;
         std::string tPrefix = prefix + key;
 
-        if(key == "$or") {
+        if(key == "__INVO_ID__") {
+            int add = uuid->find(value);
+            if(add != -1) {
+                tmp.insert(PageManager::readJSONFromFile(add));
+            }
+        }
+        else if(key == "$or") {
             nlohmann::json line = json[key].get<nlohmann::json>();
             for(auto& obj : line) {
                 tmp = setUnion(tmp, innerQuery(prefix, obj.get<nlohmann::json>()));
