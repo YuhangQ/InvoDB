@@ -1,11 +1,11 @@
 {
   "name": "invodb",
-  "version": "1.0.15",
+  "version": "1.0.22",
   "description": "a nosql json document database",
   "main": "index.js",
   "scripts": {
     "test": "clear && node-gyp build && node demo/test.js",
-    "install": "node-gyp rebuild",
+    "install": "cmake-js compile",
     "build": "node-gyp build"
   },
   "repository": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/YuhangQ/InvoDB#readme",
   "dependencies": {
+    "cmake-js": "^6.2.1",
     "node-addon-api": "^4.2.0"
   }
 }

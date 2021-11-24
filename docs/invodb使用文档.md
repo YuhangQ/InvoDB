@@ -1,3 +1,33 @@
+文件 API：Ciel
+
+语法解析器：徐小权、钱宇航
+
+B+索引树：钱宇航、卢胤
+
+测试：zyy，刘宇轩，徐小权
+
+控制台开发：卢胤
+
+文档：刘宇轩，钱宇航，zyy
+
+挑毛病专员：zyy
+
+
+
+ZYY：前置小知识：json、js、nodejs、invodb、invodb-node-api。实现了什么？
+
+ZYY：【演示】nodejs 使用实例，展现易用性。插入删除更新 | 分发 invodb.exe
+
+XXQ：索引算法的实现 && 数据库索引教程
+
+LY：nodejs 演示索引(提前准备一个)
+
+LYX：BenchMark跑分 vs sqlite
+
+演示实际项目 钱宇航
+
+
+
 # 简明 InvoDB 使用教程
 
 通过阅读该教程，你会对 `InvoDB` 的使用和结构有所了解。
@@ -301,4 +331,10 @@ node test.js
 下面是演示网址。
 
 [单词测试 (wento.icu)](https://word.wento.icu/)
+
+
+
+演示 BenchMark
+
+
 

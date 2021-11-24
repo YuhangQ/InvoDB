@@ -1,4 +1,4 @@
-const core = require("./build/Release/core.node");
+const core = require("./build/Release/invodb.node");
 
 function database(filename) {
     core.database(filename);
