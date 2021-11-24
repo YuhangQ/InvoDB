@@ -1,5 +1,5 @@
 //
-// Created by YuhangQ on 2021/10/22.
+// Created on 2021/10/22.
 //
 
 #ifndef INVODB_LOGGER_H

@@ -1,5 +1,5 @@
 //
-// Created by YuhangQ on 2021/10/23.
+// Created on 2021/10/23.
 //
 
 #ifndef INVODB_UUID_H

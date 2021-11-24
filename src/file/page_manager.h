@@ -1,5 +1,5 @@
 //
-// Created by YuhangQ on 2021/9/24.
+// Created on 2021/9/24.
 //
 
 #ifndef INVODB_PAGE_MANAGER_H

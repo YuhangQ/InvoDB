@@ -1,5 +1,5 @@
 //
-// Created by YuhangQ on 2021/10/25.
+// Created on 2021/10/25.
 //
 
 #ifndef INVODB_BTREE_H

@@ -1,5 +1,5 @@
 //
-// Created by YuhangQ on 2021/11/1.
+// Created on 2021/11/1.
 //
 
 #ifndef INVODB_LIST_H
