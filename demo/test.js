@@ -1,26 +1,51 @@
-
-const fs = require('fs')
-
 const invodb = require('..')
 
-invodb.database('zzz.invodb')
+invodb.database('hr.invodb')
 
-let col = invodb.collection('blog')
-if(!col.exist()) col.create();
+let person = invodb.collection('persons')
+if(!person.exist()) person.create();
 
-for(let json of col.query({})) col.remove(json)
+person.insert({
+    name: "张三",
+    age: 22,
+    salary: 3000,
+    kpi: 0.6
+})
 
-let list = fs.readFileSync(__dirname + "/list.txt").toString().split("\n")
-for(let json of list) {
-    col.insert(JSON.parse(json))
-}
+person.insert({
+    name: "李四",
+    age: 35,
+    salary: 6000,
+    kpi: 0.8
+})
 
-let result = col.query(
-    {
-        "title": {
-          "$gte": "数据库设计(1)",
-          "$lte": "数据库设计(5)",
+person.insert({
+    name: "王五",
+    age: 37,
+    salary: 20000,
+    kpi: 0.95
+})
+
+person.insert({
+    name: "李雷",
+    age: 32,
+    salary: 15000,
+    kpi: 0.35
+})
+
+
+console.log("优化互联网人力资源结构专项名单:")
+let hr = person.query({
+    $or: [
+        {
+            age: { $gte: 35 },
+            salary: { $lt: 10000 }
+        },
+        {
+            kpi: { $lt: 0.4 },
+            salary: { $gte: 10000 }
         }
-    }
-)
-console.log(result)
+    ]
+})
+console.log(hr)
+

@@ -160,14 +160,14 @@ std::set<nlohmann::json> Collection::queryRange(const std::string &prefix, nlohm
         else set = tmp, init = true;
     }
 
-    printf(">> %d queryRange  prefix: %s  query: %s\n", init, prefix.c_str(), json.dump().c_str());
+    //printf(">> %d queryRange  prefix: %s  query: %s\n", init, prefix.c_str(), json.dump().c_str());
 
     if(!init) set = queryAllByField(prefix);
 
-    printf("result: \n");
-    for(auto it=set.begin(); it!=set.end(); it++) {
-        printf(" - %s\n", it->dump().c_str());
-    }
+    // printf("result: \n");
+    // for(auto it=set.begin(); it!=set.end(); it++) {
+    //     printf(" - %s\n", it->dump().c_str());
+    // }
 
     if(json.contains("$ne")) {
         if(json["$ne"].is_null()) {
@@ -312,11 +312,11 @@ std::set<nlohmann::json> Collection::innerQuery(const std::string &prefix, const
     }
 
     auto str = json.dump();
-    printf("query: %s prefix: %s\n", str.c_str(), prefix.c_str());
-    printf("result: \n");
-    for(auto it=res.begin(); it!=res.end(); it++) {
-        printf(" - %s\n", it->dump().c_str());
-    }
+    // printf("query: %s prefix: %s\n", str.c_str(), prefix.c_str());
+    // printf("result: \n");
+    // for(auto it=res.begin(); it!=res.end(); it++) {
+    //     printf(" - %s\n", it->dump().c_str());
+    // }
 
     if (init) return queryAllByField(prefix == "" ? prefix : prefix.substr(0, prefix.size()-1));
 
@@ -484,7 +484,7 @@ std::set<nlohmann::json>
 Collection::queryNumber(const std::string &prefix, const double &minValue, const double &maxValue, const int &mod) {
     std::set<nlohmann::json> res;
     auto treeName = prefix + "$number";
-    printf(">>>> %s %f %f %d\n", prefix.c_str(), minValue, maxValue, mod);
+    //printf(">>>> %s %f %f %d\n", prefix.c_str(), minValue, maxValue, mod);
 
     if(!index->exists(treeName)) {
         return res;

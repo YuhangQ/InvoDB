@@ -31,7 +31,8 @@ function collection(collectionName) {
         create: create,
         insert: insert,
         remove: remove,
-        query: query
+        query: query,
+        update: insert
     }
 }
 
