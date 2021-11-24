@@ -1,0 +1,16 @@
+{
+  "name": "invodb-benchmark",
+  "version": "1.0.0",
+  "description": "测试invodb的性能",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "invodb": "^1.0.18",
+    "sequelize": "^6.9.0",
+    "sqlite3": "^5.0.2"
+  }
+}

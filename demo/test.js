@@ -48,4 +48,3 @@ let hr = person.query({
     ]
 })
 console.log(hr)
-
