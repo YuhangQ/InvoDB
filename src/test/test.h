@@ -64,16 +64,15 @@ void terminal() {
 
             try {
                 auto res = col->query(json);
+                printf("query result: \n");
+            for(auto& j : res) {
+                printf(" - %s\n", j.dump().c_str());
+            }
             } catch(const char *err) {
                 printf("ERROR: %s\n", err);
             } catch(...) {
                 printf("ERROR: query failed. check your input.\n");
                 continue;
-            }
-
-            printf("query result: \n");
-            for(auto& j : res) {
-                printf(" - %s\n", j.dump().c_str());
             }
         }
     }
