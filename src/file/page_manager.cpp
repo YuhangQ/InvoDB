@@ -10,6 +10,7 @@ std::fstream PageManager::stream;
 int PageManager::loadDatabase(const char *filename) { 
     Instance().stream.open(filename);
     Instance().stream.seekp(0, std::ios::end);
+
     if(!Instance().stream.is_open()) {
         std::ofstream file(filename, std::fstream::out);
         file.close();
@@ -68,12 +69,13 @@ int PageManager::allocate() {
     }
 
     index = page.getIntStartFrom(4);
+
     //printf("2allocate: %d\n", index);
 
     page.setIntStartFrom(4, index + 1);
     page.save();
     //      allocate block at the end
-//    stream.seekp(0, std::ios::end);
+ //   stream.seekp(0, std::ios::end);
 //    index = stream.tellp() / 1024;
     setPage(index, StoragePage(index));
     return index;
