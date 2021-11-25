@@ -6,7 +6,7 @@
   "scripts": {
     "test": "clear && node-gyp build && node demo/test.js",
     "install": "cmake-js compile",
-    "build": "node-gyp build"
+    "build": "cmake-js compile"
   },
   "repository": {
     "type": "git",

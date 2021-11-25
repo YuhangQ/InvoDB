@@ -9,6 +9,7 @@ Collection *col;
 
 void terminal() {
 
+    srand(time(0));
     PageManager::loadDatabase("test.invodb");
     Collection::loadCollections();
 
@@ -32,24 +33,43 @@ void terminal() {
             nlohmann::json json;
             try {
                 json = nlohmann::json::parse(input);
+            } catch(const char *err) {
+                printf("ERROR: %s\n", err);
             } catch(...) {
                 printf("ERROR: your insert input isn't a json.\n");
                 continue;
             }
-            col->insert(json);
-            printf("You insert json: %s\n", json.dump().c_str());
+
+            try {
+                col->insert(json);
+            } catch(const char *err) {
+                printf("ERROR: %s\n", err);
+            } catch(...) {
+                printf("ERROR: insert failed. check your input.\n");
+                continue;
+            }
+            //printf("You insert json: %s\n", json.dump().c_str());
 
         } else if(input.find("query ") == 0) {
             input = input.substr(6, input.size());
             nlohmann::json json;
             try {
                 json = nlohmann::json::parse(input);
+            } catch(const char *err) {
+                printf("ERROR: %s\n", err);
             } catch(...) {
                 printf("ERROR: your query input isn't a json.\n");
                 continue;
             }
 
-            auto res = col->query(json);
+            try {
+                auto res = col->query(json);
+            } catch(const char *err) {
+                printf("ERROR: %s\n", err);
+            } catch(...) {
+                printf("ERROR: query failed. check your input.\n");
+                continue;
+            }
 
             printf("query result: \n");
             for(auto& j : res) {

@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 include_directories(${CMAKE_JS_INC})
 
-file(GLOB SOURCE_FILES "src/*.h" "src/*.cpp" "src/btree/*.h" "src/collection/*.h" "src/collection/*.cpp" "src/file/*.h" "src/file/*.cpp" "src/test/*.h" "src/utils/*.h")
+file(GLOB SOURCE_FILES "src/api.h" "src/api.cpp" "src/btree/*.h" "src/collection/*.h" "src/collection/*.cpp" "src/file/*.h" "src/file/*.cpp" "src/test/*.h" "src/utils/*.h")
 
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")

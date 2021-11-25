@@ -1,1 +1,5 @@
 node_modules
+benchmark.invodb
+benchmark.sqlite
+test.log
+test2.log
