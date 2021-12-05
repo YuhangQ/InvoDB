@@ -17,7 +17,7 @@ function collection(collectionName) {
         let json = JSON.stringify(object);
         core.remove(collectionName, json);
     }
-    function query(object) {
+    function find(object) {
         if(!core.exists(collectionName)) throw `Collection ${collectionName} doesn't exists!`;
         let json = JSON.stringify(object);
         let res = [];
@@ -26,12 +26,18 @@ function collection(collectionName) {
         }
         return res;
     }
+    function findOne(object) {
+        let res = find(object);
+        if(res.length >= 1) return res[0];
+        return undefined;
+    }
     return {
         exist: exist,
         create: create,
         insert: insert,
         remove: remove,
-        query: query,
+        find: find,
+        findOne: findOne,
         update: insert
     }
 }

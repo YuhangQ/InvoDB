@@ -3,7 +3,6 @@ const { execSync } = require("child_process")
 
 execSync("rm -rf benchmark.invodb")
 
-
 let time = 0
 function clock() {
     let last = time

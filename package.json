@@ -1,6 +1,6 @@
 {
   "name": "invodb",
-  "version": "1.0.23",
+  "version": "1.1.0",
   "description": "a nosql json document database",
   "main": "index.js",
   "scripts": {
